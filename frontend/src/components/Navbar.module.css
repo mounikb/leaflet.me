@@ -1,0 +1,87 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: transparent;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.header.scrolled {
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom-color: rgba(26, 23, 20, 0.08);
+}
+
+.nav {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* shared list reset */
+.leftLinks,
+.rightLinks {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.link {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-mid);
+  padding: 5px 14px;
+  border-radius: 30px;
+  transition: color 0.2s, background 0.2s;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--ink);
+  background: var(--paper-dark);
+}
+
+/* First item — brand — gets a subtle border box like Chester */
+.primary {
+  color: var(--ink);
+  font-weight: 500;
+  background: var(--paper-darker, var(--paper-dark));
+  border: 1px solid rgba(26, 23, 20, 0.15);
+}
+
+.primary:hover {
+  background: var(--paper-deeper);
+  border-color: rgba(26, 23, 20, 0.25);
+}
+
+@media (max-width: 640px) {
+  .nav { padding: 0 20px; }
+  .rightLinks { display: none; }
+}
+
+.userLabel {
+  font-size: 13.5px;
+  color: var(--ink-mid);
+  font-family: var(--font-sans);
+  padding: 5px 14px;
+}
+
+.signupBtn {
+  background: var(--ink);
+  color: var(--paper) !important;
+  border: none;
+  cursor: pointer;
+}
+.signupBtn:hover {
+  background: var(--orchid) !important;
+  color: var(--paper) !important;
+}

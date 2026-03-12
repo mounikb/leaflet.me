@@ -1,0 +1,108 @@
+.hero {
+  max-width: 600px;
+  padding: 80px 0 60px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Big editorial body text — the Chester.how signature */
+.line {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.2vw, 38px);
+  font-weight: 300;
+  line-height: 1.35;
+  color: var(--ink-light);
+  letter-spacing: -0.01em;
+}
+
+/* Bold highlights inside lines */
+.line strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Italic */
+.line em {
+  font-style: italic;
+  color: var(--ink);
+}
+
+/* Underlined keyword — like "digital garden" link in Chester */
+.underlined {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-color: var(--ink-faint);
+  transition: text-decoration-color 0.2s;
+  cursor: pointer;
+}
+.underlined:hover {
+  text-decoration-color: var(--orchid);
+}
+
+/* Slightly more muted lines */
+.muted {
+  color: var(--ink-light);
+}
+
+/* Accent colour highlight */
+.accent {
+  color: var(--orchid);
+  font-weight: 400;
+}
+
+/* Brand name */
+.brand {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* CTA row */
+.cta {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.btnPrimary {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 28px;
+  border-radius: var(--r-sm);
+  letter-spacing: 0.02em;
+  transition: background 0.25s var(--ease), transform 0.2s;
+}
+.btnPrimary:hover {
+  background: var(--orchid);
+  transform: translateY(-2px);
+}
+
+.btnGhost {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-mid);
+  padding: 11px 24px;
+  border: 1px solid var(--ink-faint);
+  border-radius: var(--r-sm);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btnGhost:hover {
+  border-color: var(--ink-mid);
+  color: var(--ink);
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 48px 0 40px; }
+}
