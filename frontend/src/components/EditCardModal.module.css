@@ -1,0 +1,54 @@
+.deleteSection {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--paper-deeper);
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-faint);
+  padding: 0;
+  transition: color 0.2s;
+}
+.deleteBtn:hover { color: #8B2D20; }
+
+.confirmRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.confirmText {
+  font-size: 13px;
+  color: var(--ink-mid);
+  font-family: var(--font-sans);
+}
+
+.confirmYes {
+  background: #8B2D20;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.confirmYes:hover { background: #6B1F15; }
+.confirmYes:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.confirmNo {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-light);
+  font-family: var(--font-sans);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

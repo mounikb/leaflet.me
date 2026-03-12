@@ -81,20 +81,27 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
             {pinnedCards.map(card => (
               <div
                 key={card.id}
-                className={styles.card}
+                className={`${styles.card} ${!card.image_url ? styles.cardNoImage : ''}`}
                 onClick={() => setSelectedCard(card)}
               >
-                {card.image_url && (
-                  <img src={card.image_url} alt={card.title} className={styles.cardImg} />
-                )}
-                <div className={styles.cardTopic}>📌 {card.topic}</div>
-                <h3 className={styles.cardTitle}>{card.title}</h3>
-                {card.content && (
-                  <p className={styles.cardText}>
-                    {card.content.length > 100
-                      ? card.content.slice(0, 100) + '...'
-                      : card.content}
-                  </p>
+                {card.image_url ? (
+                  <>
+                    <img src={card.image_url} alt={card.title} className={styles.cardImg} />
+                    <div className={styles.cardOverlay}>
+                      <div className={styles.cardTopic}>📌 {card.topic}</div>
+                      <h3 className={styles.cardTitle}>{card.title}</h3>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.cardTopic}>📌 {card.topic}</div>
+                    <h3 className={styles.cardTitle}>{card.title}</h3>
+                    {card.content && (
+                      <p className={styles.cardText}>
+                        {card.content.length > 100 ? card.content.slice(0, 100) + '...' : card.content}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             ))}
