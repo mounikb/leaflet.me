@@ -63,6 +63,12 @@
   border-color: rgba(26, 23, 20, 0.25);
 }
 
+.topicActive {
+  color: var(--ink) !important;
+  background: var(--paper-dark) !important;
+  font-weight: 500;
+}
+
 @media (max-width: 640px) {
   .nav { padding: 0 20px; }
   .rightLinks { display: none; }
