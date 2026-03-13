@@ -6,7 +6,6 @@
   transition: background 0.3s ease, border-color 0.3s ease;
   border-bottom: 1px solid transparent;
 }
-
 .header.scrolled {
   background: rgba(245, 240, 232, 0.92);
   backdrop-filter: blur(16px);
@@ -24,9 +23,7 @@
   justify-content: space-between;
 }
 
-/* shared list reset */
-.leftLinks,
-.rightLinks {
+.leftLinks, .rightLinks {
   list-style: none;
   display: flex;
   align-items: center;
@@ -43,35 +40,25 @@
   transition: color 0.2s, background 0.2s;
   letter-spacing: 0.01em;
   cursor: pointer;
+  background: none;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
 }
+.link:hover { color: var(--ink); background: var(--paper-dark); }
 
-.link:hover {
-  color: var(--ink);
-  background: var(--paper-dark);
-}
-
-/* First item — brand — gets a subtle border box like Chester */
 .primary {
   color: var(--ink);
   font-weight: 500;
   background: var(--paper-darker, var(--paper-dark));
   border: 1px solid rgba(26, 23, 20, 0.15);
 }
-
-.primary:hover {
-  background: var(--paper-deeper);
-  border-color: rgba(26, 23, 20, 0.25);
-}
+.primary:hover { background: var(--paper-deeper); border-color: rgba(26,23,20,0.25); }
 
 .topicActive {
   color: var(--ink) !important;
   background: var(--paper-dark) !important;
   font-weight: 500;
-}
-
-@media (max-width: 640px) {
-  .nav { padding: 0 20px; }
-  .rightLinks { display: none; }
 }
 
 .userLabel {
@@ -82,12 +69,146 @@
 }
 
 .signupBtn {
+  background: var(--ink) !important;
+  color: var(--paper) !important;
+  border: none; cursor: pointer;
+}
+.signupBtn:hover { background: var(--orchid) !important; color: var(--paper) !important; }
+
+.signoutBtn { color: var(--ink-light); }
+
+/* ── Settings button ── */
+.settingsBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  background: var(--paper-dark);
+  border: 1px solid rgba(26,23,20,0.1);
+  border-radius: 30px;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.settingsBtn:hover, .settingsBtnActive {
   background: var(--ink);
   color: var(--paper) !important;
+  border-color: var(--ink);
+}
+.settingsIcon { font-size: 14px; transition: transform 0.4s; }
+.settingsBtnActive .settingsIcon { transform: rotate(60deg); }
+
+/* ── Dropdown ── */
+.menuWrap { position: relative; }
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 280px;
+  background: var(--paper);
+  border: 1px solid rgba(26,23,20,0.1);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(26,23,20,0.15);
+  padding: 8px;
+  z-index: 500;
+  animation: dropIn 0.2s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dropdownHeader {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 6px 12px 4px;
+}
+
+.dropItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: none;
   border: none;
   cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
 }
-.signupBtn:hover {
-  background: var(--orchid) !important;
-  color: var(--paper) !important;
+.dropItem:hover { background: var(--paper-dark); }
+.dropItemActive { background: var(--paper-dark); }
+.dropItemDanger:hover { background: #fdf0ef; }
+.dropItemDanger .dropLabel { color: #8B2D20; }
+
+.dropIcon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+
+.dropLabel {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dropSub {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.dropChevron {
+  font-size: 9px;
+  color: var(--ink-faint);
+}
+
+.dropDivider {
+  height: 1px;
+  background: rgba(26,23,20,0.07);
+  margin: 4px 8px;
+}
+
+.activePill {
+  background: var(--orchid);
+  color: white;
+  font-size: 10px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+
+/* ── Theme swatches ── */
+.themeGrid {
+  display: flex;
+  gap: 8px;
+  padding: 6px 12px 10px;
+}
+
+.themeDot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(26,23,20,0.15);
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.themeDot:hover { transform: scale(1.15); }
+.themeDotActive { border-color: var(--ink); border-width: 2.5px; transform: scale(1.1); }
+
+@media (max-width: 640px) {
+  .nav { padding: 0 20px; }
+  .rightLinks { display: none; }
 }

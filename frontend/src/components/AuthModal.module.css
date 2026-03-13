@@ -227,6 +227,21 @@
   border: 1px solid #F0C4BC;
 }
 
+/* ── Username availability indicator ── */
+.usernameHint {
+  margin-top: 5px;
+  min-height: 18px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+}
+.usernameRule   { color: var(--ink-faint); }
+.usernameChecking { color: var(--ink-faint); font-style: italic; }
+.usernameAvailable { color: #3a7d44; font-weight: 500; }
+.usernameTaken  { color: #8B2D20; font-weight: 500; }
+
+.inputError { border-color: #e07060 !important; }
+.inputValid  { border-color: #6aaa78 !important; }
+
 /* ── Submit ── */
 .submitBtn {
   width: 100%;

@@ -55,6 +55,47 @@ button, input, textarea, select { font: inherit; }
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* ── Themes ── */
+[data-theme="dark"] {
+  --paper:        #1a1714;
+  --paper-dark:   #231f1b;
+  --paper-deeper: #2a2520;
+  --ink:          #f0ebe2;
+  --ink-mid:      #b8b0a6;
+  --ink-light:    #7a7268;
+  --ink-faint:    #4a4540;
+  --orchid:       #c49ab6;
+  --orchid-light: #d4afc8;
+  --orchid-pale:  #2a1f26;
+}
+
+[data-theme="sage"] {
+  --paper:        #e8ede6;
+  --paper-dark:   #dce4d9;
+  --paper-deeper: #d0dace;
+  --orchid:       #4a7a5a;
+  --orchid-light: #6a9a78;
+  --orchid-pale:  #d8e8dc;
+}
+
+[data-theme="rose"] {
+  --paper:        #f5ece8;
+  --paper-dark:   #ede0da;
+  --paper-deeper: #e4d4cc;
+  --orchid:       #9a4a5a;
+  --orchid-light: #c07080;
+  --orchid-pale:  #f0dde0;
+}
+
+[data-theme="slate"] {
+  --paper:        #e8ecef;
+  --paper-dark:   #dce2e8;
+  --paper-deeper: #d0d8e0;
+  --orchid:       #4a6a8a;
+  --orchid-light: #6a8aaa;
+  --orchid-pale:  #d8e4ee;
+}
+
 /* ── Base ── */
 body {
   background-color: var(--paper);

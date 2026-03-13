@@ -16,14 +16,16 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
   const [saving, setSaving] = useState(false);
 
   function toggleTopic(topic) {
-    setSelectedTopics(prev =>
-      prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]
-    );
+    setSelectedTopics(prev => {
+      if (prev.includes(topic)) return prev.filter(t => t !== topic);
+      if (prev.length >= 7) return prev; // max 7
+      return [...prev, topic];
+    });
   }
 
   function addCustomTopic() {
     const t = customTopic.trim();
-    if (t && !selectedTopics.includes(t)) {
+    if (t && !selectedTopics.includes(t) && selectedTopics.length < 7) {
       setSelectedTopics(prev => [...prev, t]);
     }
     setCustomTopic('');
@@ -99,7 +101,12 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
           <div className={styles.step}>
             <div className={styles.stepIcon}>🏷️</div>
             <h2 className={styles.title}>What do you want to grow?</h2>
-            <p className={styles.subTitle}>Pick topics for your garden. You can always change these later.</p>
+            <p className={styles.subTitle}>
+              Pick topics for your garden.
+              <span className={selectedTopics.length >= 7 ? styles.limitReached : styles.limitCount}>
+                {' '}{selectedTopics.length}/7
+              </span>
+            </p>
 
             <div className={styles.topicGrid}>
               {DEFAULT_TOPICS.map(topic => (
@@ -164,9 +171,12 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
               className={styles.bioInput}
               placeholder="e.g. I make sourdough, read too much, and think about fonts obsessively..."
               value={bio}
-              onChange={e => setBio(e.target.value)}
+              onChange={e => setBio(e.target.value.slice(0, 280))}
               rows={4}
             />
+            <div className={styles.charCount}>
+              <span className={bio.length >= 260 ? styles.charWarn : ''}>{bio.length}</span>/280
+            </div>
 
             <div className={styles.actions}>
               <button className={styles.skipBtn} onClick={() => handleFinish()}>Skip</button>

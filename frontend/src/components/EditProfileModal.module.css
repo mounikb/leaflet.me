@@ -1,0 +1,146 @@
+.overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(26,23,20,0.5);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--paper);
+  border-radius: 20px;
+  width: 100%; max-width: 480px;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(26,23,20,0.2);
+  animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.close {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(26,23,20,0.06); border: none;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 14px; color: var(--ink-mid); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.close:hover { background: rgba(26,23,20,0.12); }
+
+.title {
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 400;
+  color: var(--ink); margin-bottom: 20px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 4px;
+  background: var(--paper-dark);
+  border-radius: 10px; padding: 4px;
+  margin-bottom: 24px;
+}
+.tab {
+  flex: 1; padding: 7px;
+  background: none; border: none;
+  border-radius: 8px;
+  font-family: var(--font-sans); font-size: 13px;
+  font-weight: 500; color: var(--ink-light);
+  cursor: pointer; transition: background 0.2s, color 0.2s;
+}
+.tabActive {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(26,23,20,0.1);
+}
+
+.section { margin-bottom: 24px; }
+
+.hint {
+  font-family: var(--font-sans); font-size: 13px;
+  color: var(--ink-light); margin-bottom: 14px; line-height: 1.5;
+}
+
+.textarea {
+  width: 100%;
+  background: white;
+  border: 1px solid rgba(26,23,20,0.12);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: var(--font-display);
+  font-size: 16px; color: var(--ink);
+  line-height: 1.6; resize: vertical;
+  transition: border-color 0.2s;
+}
+.textarea:focus { outline: none; border-color: var(--orchid-light); }
+
+/* Topic grid */
+.topicGrid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.topicBtn {
+  padding: 7px 16px;
+  border-radius: 30px;
+  border: 1px solid rgba(26,23,20,0.15);
+  background: white;
+  font-family: var(--font-sans); font-size: 13px;
+  color: var(--ink-mid); cursor: pointer;
+  transition: all 0.2s;
+}
+.topicBtn:hover { border-color: var(--orchid-light); color: var(--orchid); }
+.topicSelected {
+  background: var(--orchid-pale) !important;
+  border-color: var(--orchid-light) !important;
+  color: var(--orchid) !important;
+  font-weight: 500;
+}
+.plusBtn {
+  padding: 7px 16px; border-radius: 30px;
+  border: 1px dashed rgba(26,23,20,0.2);
+  background: none; font-family: var(--font-sans);
+  font-size: 13px; color: var(--ink-faint); cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.plusBtn:hover { border-color: var(--orchid-light); color: var(--orchid); }
+.customWrap { display: flex; gap: 6px; align-items: center; }
+.customInput {
+  padding: 7px 12px; border-radius: 30px;
+  border: 1px solid var(--orchid-light);
+  background: white; font-family: var(--font-sans);
+  font-size: 13px; color: var(--ink); outline: none;
+  width: 140px;
+}
+.customAddBtn {
+  padding: 7px 14px; border-radius: 30px;
+  background: var(--orchid); color: white;
+  border: none; font-family: var(--font-sans);
+  font-size: 13px; cursor: pointer;
+}
+
+/* Actions */
+.actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  margin-top: 8px;
+}
+.cancelBtn {
+  padding: 10px 20px; border-radius: 10px;
+  background: none; border: 1px solid rgba(26,23,20,0.12);
+  font-family: var(--font-sans); font-size: 13.5px;
+  color: var(--ink-mid); cursor: pointer;
+  transition: background 0.2s;
+}
+.cancelBtn:hover { background: var(--paper-dark); }
+.saveBtn {
+  padding: 10px 24px; border-radius: 10px;
+  background: var(--ink); color: var(--paper);
+  border: none; font-family: var(--font-sans);
+  font-size: 13.5px; font-weight: 500; cursor: pointer;
+  transition: background 0.2s;
+}
+.saveBtn:hover { background: var(--orchid); }
+.saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }

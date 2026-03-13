@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import styles from './AddCardModal.module.css';
-import deleteStyles from './EditCardModal.module.css';
+import styles from './EditCardModal.module.css';
 
 export default function EditCardModal({ card, onClose, onCardUpdated, onCardDeleted }) {
-  const [title, setTitle] = useState(card.title || '');
-  const [content, setContent] = useState(card.content || '');
-  const [imageFile, setImageFile] = useState(null);
+  const [title, setTitle]           = useState(card.title || '');
+  const [content, setContent]       = useState(card.content || '');
+  const [imageFile, setImageFile]   = useState(null);
   const [imagePreview, setImagePreview] = useState(card.image_url || null);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving]         = useState(false);
+  const [deleting, setDeleting]     = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]           = useState(null);
 
   function handleImage(e) {
     const file = e.target.files[0];
@@ -80,7 +79,8 @@ export default function EditCardModal({ card, onClose, onCardUpdated, onCardDele
           {imagePreview ? (
             <div className={styles.previewWrap}>
               <img src={imagePreview} alt="preview" className={styles.preview} />
-              <button className={styles.removeImg} onClick={() => { setImageFile(null); setImagePreview(null); }}>
+              <button className={styles.removeImg}
+                onClick={() => { setImageFile(null); setImagePreview(null); }}>
                 Remove
               </button>
             </div>
@@ -102,18 +102,18 @@ export default function EditCardModal({ card, onClose, onCardUpdated, onCardDele
         </div>
 
         {/* Delete section */}
-        <div className={deleteStyles.deleteSection}>
+        <div className={styles.deleteSection}>
           {!confirmDelete ? (
-            <button className={deleteStyles.deleteBtn} onClick={() => setConfirmDelete(true)}>
+            <button className={styles.deleteBtn} onClick={() => setConfirmDelete(true)}>
               🗑 Delete this card
             </button>
           ) : (
-            <div className={deleteStyles.confirmRow}>
-              <span className={deleteStyles.confirmText}>Are you sure?</span>
-              <button className={deleteStyles.confirmYes} onClick={handleDelete} disabled={deleting}>
+            <div className={styles.confirmRow}>
+              <span className={styles.confirmText}>Are you sure?</span>
+              <button className={styles.confirmYes} onClick={handleDelete} disabled={deleting}>
                 {deleting ? 'Deleting...' : 'Yes, delete'}
               </button>
-              <button className={deleteStyles.confirmNo} onClick={() => setConfirmDelete(false)}>
+              <button className={styles.confirmNo} onClick={() => setConfirmDelete(false)}>
                 Cancel
               </button>
             </div>

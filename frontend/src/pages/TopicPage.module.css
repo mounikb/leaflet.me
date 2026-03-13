@@ -145,6 +145,50 @@
 .actionBtn:hover { background: white; transform: scale(1.1); }
 .pinned { opacity: 1 !important; }
 
+/* ── Drag mode ── */
+.dragBanner {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+  letter-spacing: 0.02em;
+}
+
+.dragActive { cursor: default; }
+.draggable { cursor: grab; }
+.draggable:active { cursor: grabbing; }
+
+.isDragging {
+  opacity: 0.35;
+  transform: scale(0.97) !important;
+  box-shadow: none !important;
+}
+
+.isDragOver {
+  outline: 2.5px dashed var(--orchid);
+  outline-offset: 3px;
+  transform: scale(1.02) !important;
+}
+
+.dragHandle {
+  position: absolute;
+  top: 10px; left: 10px;
+  z-index: 10;
+  font-size: 16px;
+  color: rgba(255,255,255,0.9);
+  background: rgba(26,23,20,0.5);
+  backdrop-filter: blur(4px);
+  border-radius: 8px;
+  padding: 4px 7px;
+  line-height: 1;
+  pointer-events: none;
+  letter-spacing: 2px;
+}
+
 /* ── Add card tile ── */
 .addCard {
   background: none;

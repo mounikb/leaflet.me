@@ -43,6 +43,16 @@ export default function AddCardModal({ session, topics, onClose, onCardAdded }) 
       imageUrl = data.publicUrl;
     }
 
+    // Get current max position for this topic so new card goes to the end
+    const { data: existing } = await supabase
+      .from('cards')
+      .select('position')
+      .eq('user_id', session.user.id)
+      .eq('topic', topic)
+      .order('position', { ascending: false })
+      .limit(1);
+    const nextPosition = existing?.[0]?.position != null ? existing[0].position + 1 : 0;
+
     // Save card to DB
     const { data, error: dbError } = await supabase.from('cards').insert({
       user_id: session.user.id,
@@ -50,6 +60,7 @@ export default function AddCardModal({ session, topics, onClose, onCardAdded }) 
       content: content.trim(),
       topic,
       image_url: imageUrl,
+      position: nextPosition,
     }).select().single();
 
     setSaving(false);

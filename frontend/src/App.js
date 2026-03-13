@@ -17,6 +17,7 @@ export default function App() {
   const [gardenUsername, setGardenUsername] = useState(null);
   const [currentTopic, setCurrentTopic] = useState(null);
   const [gardenTopics, setGardenTopics] = useState([]);
+  const [dragMode, setDragMode] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -49,12 +50,17 @@ export default function App() {
   async function handlePlantClick() {
     if (!session) { setShowAuth(true); return; }
 
-    const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
+    // Always fetch username from profiles table — most reliable source
     const { data: profile } = await supabase
       .from('profiles')
-      .select('onboarded')
+      .select('username, onboarded')
       .eq('id', session.user.id)
       .single();
+
+    // Fall back to user_metadata username, then email prefix as last resort
+    const username = profile?.username
+      || session.user.user_metadata?.username
+      || session.user.email.split('@')[0];
 
     if (profile?.onboarded) {
       navigateToGarden(username);
@@ -104,6 +110,14 @@ export default function App() {
           if (t === gardenUsername) { goToGarden(); }
           else { navigateToTopic(t); }
         }}
+        isOwnerGarden={
+          currentPage !== 'home' &&
+          session?.user &&
+          (session.user.user_metadata?.username === gardenUsername ||
+           session.user.email?.split('@')[0] === gardenUsername)
+        }
+        dragMode={dragMode}
+        onDragModeToggle={() => setDragMode(d => !d)}
       />
 
       {currentPage === 'home' && (
@@ -116,6 +130,7 @@ export default function App() {
           session={session}
           onTopicsLoaded={setGardenTopics}
           onNavigateToTopic={navigateToTopic}
+          dragMode={dragMode}
         />
       )}
 
@@ -125,6 +140,7 @@ export default function App() {
           topic={currentTopic}
           session={session}
           onBack={goToGarden}
+          dragMode={dragMode}
         />
       )}
 
