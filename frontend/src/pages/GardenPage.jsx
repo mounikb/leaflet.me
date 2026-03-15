@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import CardModal from '../components/CardModal';
 import EditProfileModal from '../components/EditProfileModal';
 import styles from './GardenPage.module.css';
+import { computeLayout } from '../lib/gridLayout';
 
 export default function GardenPage({ username, session, onTopicsLoaded, onNavigateToTopic, dragMode }) {
   const [profile, setProfile]           = useState(null);
@@ -101,80 +102,143 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
   }
 
   const topics    = profile?.topics || [];
-  const hasPinned = pinnedCards.length > 0;
+
+  // Chester layout: intro in col 1 rows 1-N, cards fill cols 2-3 then all 3 cols
+  const INTRO_ROWS = 3; // how many rows the intro spans
+  const laid = computeLayout(pinnedCards, 3); // full 3-col tetris
+
+  // For the first INTRO_ROWS rows, cards that land in col 1 get pushed to col 2
+  // We do this by computing layout starting from col 2 for first INTRO_ROWS rows
+  function chesterLayout(cards) {
+    if (!cards.length) return [];
+    const COLS = 3;
+    const occupied = [];
+    function isOccupied(row, col) { return occupied[row]?.[col] === true; }
+    function occupy(row, col, rowSpan, colSpan) {
+      for (let r = row; r < row + rowSpan; r++) {
+        if (!occupied[r]) occupied[r] = [];
+        for (let c = col; c < col + colSpan; c++) occupied[r][c] = true;
+      }
+    }
+    // Block col 0 for first INTRO_ROWS rows (intro lives there)
+    for (let r = 0; r < INTRO_ROWS; r++) {
+      if (!occupied[r]) occupied[r] = [];
+      occupied[r][0] = true;
+    }
+    function findSlot(colSpan, rowSpan) {
+      const span = Math.min(colSpan, COLS);
+      for (let row = 0; row < 999; row++) {
+        for (let col = 0; col <= COLS - span; col++) {
+          let fits = true;
+          outer: for (let r = row; r < row + rowSpan; r++) {
+            for (let c = col; c < col + span; c++) {
+              if (isOccupied(r, c)) { fits = false; break outer; }
+            }
+          }
+          if (fits) return { row, col, span };
+        }
+      }
+      return { row: 0, col: 1, span: colSpan };
+    }
+    function getSizeSpan(size) {
+      switch(size) {
+        case '2x2': return { colSpan: 2, rowSpan: 2 };
+        case '2x1': return { colSpan: 2, rowSpan: 1 };
+        case '1x2': return { colSpan: 1, rowSpan: 2 };
+        default:    return { colSpan: 1, rowSpan: 1 };
+      }
+    }
+    return cards.map(card => {
+      const { colSpan, rowSpan } = getSizeSpan(card.size || '1x1');
+      const { row, col, span } = findSlot(colSpan, rowSpan);
+      occupy(row, col, rowSpan, span);
+      return {
+        ...card,
+        gridColumn: `${col + 1} / span ${span}`,
+        gridRow:    `${row + 1} / span ${rowSpan}`,
+      };
+    });
+  }
+
+  const layoutCards = chesterLayout(pinnedCards);
 
   return (
-    <div className={`${styles.page} ${hasPinned ? styles.twoCol : ''}`}>
+    <div className={styles.page}>
 
+      {/* Intro — col 1, spans INTRO_ROWS rows */}
       <aside className={styles.intro}>
-        <div className={styles.profileName}>
-          {username}
-          {isOwner && (
-            <button
-              className={styles.editBtn}
-              title="Edit your garden"
-              onClick={() => { setEditTab('bio'); setShowEditProfile(true); }}
-            >✏️</button>
-          )}
-        </div>
-        {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
+        {profile.bio && (
+          <p className={styles.bio}>
+            {profile.bio}
+            {isOwner && (
+              <button
+                className={styles.editBtn}
+                title="Edit your garden"
+                onClick={() => { setEditTab('bio'); setShowEditProfile(true); }}
+              >✏️</button>
+            )}
+          </p>
+        )}
         {isOwner && topics.length === 0 && (
           <p className={styles.emptyHint}>Your garden is empty. Go through onboarding to add topics! 🌱</p>
         )}
       </aside>
 
-      {hasPinned && (
-        <main className={styles.pinnedArea}>
-          {dragMode && isOwner && (
-            <div className={styles.dragBanner}>⠿ Drag mode — drag pinned cards to reorder.</div>
-          )}
-          <p className={styles.pinnedLabel}>Pinned ↓</p>
-          <div className={styles.masonry}>
-            {pinnedCards.map((card, idx) => (
-              <div
-                key={card.id}
-                className={`
-                  ${styles.card}
-                  ${!card.image_url ? styles.cardNoImage : ''}
-                  ${dragMode && isOwner ? styles.draggable : ''}
-                  ${draggingId === card.id ? styles.isDragging : ''}
-                  ${dragMode && overIdx === idx && draggingId !== card.id ? styles.isDragOver : ''}
-                `}
-                draggable={dragMode && isOwner}
-                onDragStart={dragMode ? e => onDragStart(e, card) : undefined}
-                onDragEnter={dragMode ? e => onDragEnter(e, card) : undefined}
-                onDragOver={dragMode ? onDragOver : undefined}
-                onDrop={dragMode ? e => onDrop(e, card) : undefined}
-                onDragEnd={dragMode ? onDragEnd : undefined}
-                onClick={() => !dragMode && setSelectedCard(card)}
-              >
-                {dragMode && isOwner && <div className={styles.dragHandle}>⠿</div>}
-                {card.image_url ? (
-                  <>
-                    <img src={card.image_url} alt={card.title} className={styles.cardImg} />
-                    <div className={styles.cardOverlay}>
-                      <div className={styles.cardTopic}>📌 {card.topic}</div>
-                      <h3 className={styles.cardTitle}>{card.title}</h3>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className={styles.cardTopic}>📌 {card.topic}</div>
-                    <h3 className={styles.cardTitle}>{card.title}</h3>
-                    {card.content && (
-                      <p className={styles.cardText}>
-                        {card.content.length > 100 ? card.content.slice(0, 100) + '...' : card.content}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        </main>
+      {/* Each card is a direct child of .page grid */}
+      {dragMode && isOwner && (
+        <div className={styles.dragBanner}>⠿ Drag mode — drag pinned cards to reorder.</div>
       )}
 
-      {selectedCard && <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />}
+      {pinnedCards.length === 0 ? (
+        <div className={styles.noPinned}>
+          <span className={styles.noPinnedIcon}>🌱</span>
+          <p>{isOwner ? 'Pin cards from your topics to show them here.' : 'Nothing pinned yet.'}</p>
+        </div>
+      ) : (
+        layoutCards.map((card, idx) => (
+          <div
+            key={card.id}
+            className={`
+              ${styles.card}
+              ${!card.image_url ? styles.cardNoImage : ''}
+              ${dragMode && isOwner ? styles.draggable : ''}
+              ${draggingId === card.id ? styles.isDragging : ''}
+              ${dragMode && overIdx === idx && draggingId !== card.id ? styles.isDragOver : ''}
+            `}
+            style={{ gridColumn: card.gridColumn, gridRow: card.gridRow }}
+            draggable={dragMode && isOwner}
+            onDragStart={dragMode ? e => onDragStart(e, card) : undefined}
+            onDragEnter={dragMode ? e => onDragEnter(e, card) : undefined}
+            onDragOver={dragMode ? onDragOver : undefined}
+            onDrop={dragMode ? e => onDrop(e, card) : undefined}
+            onDragEnd={dragMode ? onDragEnd : undefined}
+            onClick={() => !dragMode && setSelectedCard(card)}
+          >
+            {dragMode && isOwner && <div className={styles.dragHandle}>⠿</div>}
+            {card.image_url ? (
+              <>
+                <img src={card.image_url} alt={card.title} className={styles.cardImg} />
+                <div className={styles.cardOverlay}>
+                  <div className={styles.cardTopic}>📌 {card.topic}</div>
+                  <h3 className={styles.cardTitle}>{card.title}</h3>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={styles.cardTopic}>📌 {card.topic}</div>
+                <h3 className={styles.cardTitle}>{card.title}</h3>
+                {card.content && (
+                  <p className={styles.cardText}>
+                    {card.content.length > 100 ? card.content.slice(0, 100) + '...' : card.content}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        ))
+      )}
+
+      {selectedCard && <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} onNavigateToTopic={onNavigateToTopic} />}
 
       {showEditProfile && (
         <EditProfileModal

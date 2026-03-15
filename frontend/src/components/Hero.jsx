@@ -1,42 +1,158 @@
 import React from 'react';
+import heroImg from '../assets/hero-cottage.jpg';
 import styles from './Hero.module.css';
+
+const PREVIEW_CARDS = [
+  { topic: 'Reading',  title: 'Why I read 50 books a year',              description: 'It started as a challenge and became the best habit of my life.', tall: true },
+  { topic: 'Movies',  title: 'Films that changed how I see the world',   description: 'A quiet collection of stories that stayed with me.' },
+  { topic: 'Travel',  title: 'Three weeks in Japan with no plan',        description: "Sometimes the best trips are the ones you don't plan." },
+  { topic: 'Code',    title: 'Building in public — what I learned',      description: 'Shipping imperfect things is better than never shipping at all.' },
+  { topic: 'Music',   title: 'Albums I return to every year',            description: 'Some records never stop revealing new things.' },
+  { topic: 'Writing', title: 'On keeping a journal for 10 years',        description: 'A small practice that quietly changed everything.', tall: true },
+];
+
+const HOW_ITEMS = [
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+        <path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+      </svg>
+    ),
+    title: 'Plant your ideas',
+    desc: 'Start with a seed — a thought, a bookmark, a sketch. Watch it grow into something meaningful over time.'
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+    ),
+    title: "Curate, don't perform",
+    desc: 'No likes, no followers. Just a quiet space to collect the things that matter to you.'
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20h9"/>
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+    ),
+    title: 'Write at your own pace',
+    desc: 'No publishing pressure. Add a sentence today, a paragraph next week. Your garden grows with you.'
+  },
+];
 
 export default function Hero({ onAuthClick }) {
   return (
-    <section className={styles.hero}>
-      <div className={styles.intro}>
-        <p className={`${styles.line} fade-up delay-1`}>
-          Hey there, welcome to{' '}
-          <strong className={styles.brand}>Leaflet</strong> 🌸
-        </p>
+    <div className={styles.page}>
 
-        <p className={`${styles.line} fade-up delay-2`}>
-          A place to grow your{' '}
-          <span className={styles.underlined}>digital garden</span> 🌱 — share
-          what you love, what you're learning, and what makes you{' '}
-          <em>you</em>.
-        </p>
+      {/* ── Section 1: Hero ── */}
+      <section className={styles.heroSection}>
+        <div className={styles.heroLeft}>
+          <span className={styles.eyebrow}>Your digital garden awaits</span>
 
-        <p className={`${styles.line} ${styles.muted} fade-up delay-3`}>
-          No code needed. Just pick a name, plant some cards, and share your
-          corner of the internet with the world.
-        </p>
+          <h1 className={styles.heroHeadline}>
+            Grow your<br />
+            <em className={styles.heroItalic}>ideas</em> here.
+          </h1>
 
-        <p className={`${styles.line} ${styles.muted} fade-up delay-4`}>
-          I built this because personal websites shouldn't require a CS degree.
-          Everyone deserves a{' '}
-          <span className={styles.accent}>beautiful space online</span>.
-        </p>
+          <p className={styles.heroSub}>
+            Leaflet is a quiet corner of the internet where you can collect,
+            write, and share the things that matter — no algorithms, no noise.
+          </p>
 
-        <div className={`${styles.cta} fade-up delay-5`}>
-          <button onClick={onAuthClick} className={styles.btnPrimary}>
-            Plant your garden →
-          </button>
-          <a href="/gardens" className={styles.btnGhost}>
-            Explore gardens
-          </a>
+          <div className={styles.heroCta}>
+            <button onClick={onAuthClick} className={styles.btnPrimary}>
+              Plant your garden →
+            </button>
+            <button onClick={onAuthClick} className={styles.btnOutline}>
+              Explore gardens
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
+
+        <div className={styles.heroRight}>
+          <div className={styles.heroImgWrap}>
+            <img src={heroImg} alt="A cosy writing desk with flowers and tea" className={styles.heroImg} />
+          </div>
+          <p className={styles.heroCaption}>Your quiet corner of the internet</p>
+        </div>
+      </section>
+
+      {/* ── Section 2: Preview cards ── */}
+      <section className={styles.previewSection}>
+        <div className={styles.sectionLabel}>
+          <span>What people are growing</span>
+          <div className={styles.labelLine} />
+        </div>
+        <div className={styles.previewGrid}>
+          {PREVIEW_CARDS.map((card, i) => (
+            <div
+              key={i}
+              className={`${styles.previewCard} ${card.tall ? styles.previewCardTall : ''}`}
+              style={{ animationDelay: `${0.35 + i * 0.07}s` }}
+            >
+              <div>
+                <span className={styles.previewTopic}>{card.topic}</span>
+                <p className={styles.previewTitle}>{card.title}</p>
+              </div>
+              <p className={styles.previewDesc}>{card.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Section 3: How it works ── */}
+      <section className={styles.howSection}>
+        <div className={styles.howHeader}>
+          <span className={styles.eyebrow}>How it works</span>
+          <h2 className={styles.howTitle}>Grown slowly, made by hand.</h2>
+          <p className={styles.howSub}>
+            A digital garden isn't a blog. It's a living collection of ideas — messy,
+            evolving, and entirely yours.
+          </p>
+        </div>
+        <div className={styles.howGrid}>
+          {HOW_ITEMS.map(({ icon, title, desc }) => (
+            <div key={title} className={styles.howCard}>
+              <div className={styles.howIconWrap}>{icon}</div>
+              <h3 className={styles.howCardTitle}>{title}</h3>
+              <p className={styles.howCardDesc}>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Section 4: Quote ── */}
+      <section className={styles.quoteSection}>
+        <blockquote className={styles.quote}>
+          "The garden is a metaphor for the mind — you don't need to show
+          everything at once. Let things bloom when they're ready."
+        </blockquote>
+        <p className={styles.quoteAttrib}>— A fellow gardener</p>
+      </section>
+
+      {/* ── Section 5: CTA ── */}
+      <section className={styles.ctaSection}>
+        <div className={styles.ctaBox}>
+          <h2 className={styles.ctaTitle}>Ready to start growing?</h2>
+          <p className={styles.ctaSub}>
+            Your garden is waiting. No algorithms, no noise — just you
+            and your ideas, growing at their own pace.
+          </p>
+          <div className={styles.ctaButtons}>
+            <button onClick={onAuthClick} className={styles.btnPrimary}>
+              Plant your garden →
+            </button>
+            <button onClick={onAuthClick} className={styles.btnOutline}>
+              See examples
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
   );
 }

@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './EditCardModal.module.css';
+import addStyles from './AddCardModal.module.css';
+
+const SIZE_OPTIONS = [
+  { value: '1x1', label: '1×1', desc: 'Default', cols: 1, rows: 1 },
+  { value: '1x2', label: '1×2', desc: 'Tall',    cols: 1, rows: 2 },
+  { value: '2x1', label: '2×1', desc: 'Wide',    cols: 2, rows: 1 },
+  { value: '2x2', label: '2×2', desc: 'Large',   cols: 2, rows: 2 },
+];
 
 export default function EditCardModal({ card, onClose, onCardUpdated, onCardDeleted }) {
   const [title, setTitle]           = useState(card.title || '');
   const [content, setContent]       = useState(card.content || '');
+  const [size, setSize]             = useState(card.size || '1x1');
   const [imageFile, setImageFile]   = useState(null);
   const [imagePreview, setImagePreview] = useState(card.image_url || null);
   const [saving, setSaving]         = useState(false);
@@ -37,7 +46,7 @@ export default function EditCardModal({ card, onClose, onCardUpdated, onCardDele
 
     const { data, error: dbError } = await supabase
       .from('cards')
-      .update({ title: title.trim(), content: content.trim(), image_url: imageUrl })
+      .update({ title: title.trim(), content: content.trim(), image_url: imageUrl, size })
       .eq('id', card.id).select().single();
 
     setSaving(false);
@@ -72,6 +81,25 @@ export default function EditCardModal({ card, onClose, onCardUpdated, onCardDele
           <label className={styles.label}>Content</label>
           <textarea className={styles.textarea} placeholder="Write something..."
             value={content} onChange={e => setContent(e.target.value)} rows={4} />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Card size</label>
+          <div className={addStyles.sizePicker}>
+            {SIZE_OPTIONS.map(opt => (
+              <button key={opt.value} type="button"
+                className={`${addStyles.sizeBtn} ${size === opt.value ? addStyles.sizeBtnActive : ''}`}
+                onClick={() => setSize(opt.value)}
+              >
+                <div className={addStyles.sizePreview}>
+                  <div className={addStyles.sizeBlock}
+                    style={{ gridColumn: `span ${opt.cols}`, gridRow: `span ${opt.rows}` }} />
+                </div>
+                <span className={addStyles.sizeBtnLabel}>{opt.label}</span>
+                <span className={addStyles.sizeBtnDesc}>{opt.desc}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={styles.field}>

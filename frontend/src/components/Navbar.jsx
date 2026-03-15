@@ -17,12 +17,13 @@ const THEMES = [
 ];
 
 export default function Navbar({
-  session, onAuthClick, onLogoClick,
+  session, onAuthClick, onLogoClick, onDiscoverClick,
   gardenTopics, gardenUsername, activeTopic, onTopicClick,
   onDragModeToggle, dragMode, isOwnerGarden
 }) {
   const [scrolled, setScrolled]         = useState(false);
   const [menuOpen, setMenuOpen]         = useState(false);
+  const [mobileOpen, setMobileOpen]     = useState(false);
   const [showThemes, setShowThemes]     = useState(false);
   const [activeTheme, setActiveTheme]   = useState(() => localStorage.getItem('leaflet-theme') || 'default');
   const menuRef = useRef(null);
@@ -91,7 +92,11 @@ export default function Navbar({
           ) : (
             DEFAULT_LINKS.map(link => (
               <li key={link.label}>
-                <a href={link.href} className={styles.link}>{link.label}</a>
+                {link.label === 'Gardens' ? (
+                  <button className={styles.link} onClick={onDiscoverClick}>{link.label}</button>
+                ) : (
+                  <a href={link.href} className={styles.link}>{link.label}</a>
+                )}
               </li>
             ))
           )}
@@ -214,7 +219,55 @@ export default function Navbar({
           )}
         </ul>
 
+        {/* Mobile hamburger */}
+        <button
+          className={styles.mobileMenuBtn}
+          onClick={() => setMobileOpen(o => !o)}
+          aria-label="Menu"
+        >
+          {mobileOpen ? '✕' : '☰'}
+        </button>
+
       </nav>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className={styles.mobileDrawer}>
+          {isGardenPage ? (
+            [gardenUsername, ...gardenTopics].map(item => (
+              <button key={item}
+                className={`${styles.mobileLink} ${activeTopic === item ? styles.mobileLinkActive : ''}`}
+                onClick={() => { onTopicClick(item); setMobileOpen(false); }}
+              >{item}</button>
+            ))
+          ) : (
+            <>
+              <button className={styles.mobileLink} onClick={() => { onDiscoverClick?.(); setMobileOpen(false); }}>Gardens</button>
+              <a href="/topics" className={styles.mobileLink}>Topics</a>
+              <a href="/about" className={styles.mobileLink}>About</a>
+            </>
+          )}
+
+          <div className={styles.mobileDivider} />
+
+          {session ? (
+            <>
+              {isOwnerGarden && (
+                <button className={styles.mobileLink} onClick={() => { setMenuOpen(true); setMobileOpen(false); }}>
+                  ⚙ Customise garden
+                </button>
+              )}
+              <button className={`${styles.mobileLink} ${styles.mobileSignOut}`} onClick={handleSignOut}>
+                Sign out
+              </button>
+            </>
+          ) : (
+            <button className={styles.mobileLink} onClick={() => { onAuthClick(); setMobileOpen(false); }}>
+              Sign up / Sign in
+            </button>
+          )}
+        </div>
+      )}
     </header>
   );
 }

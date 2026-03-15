@@ -151,3 +151,70 @@
 }
 .saveBtn:hover:not(:disabled) { background: var(--orchid); }
 .saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .overlay { align-items: flex-end; padding: 0; }
+  .modal {
+    max-width: 100%; border-radius: 20px 20px 0 0;
+    padding: 28px 20px 36px; max-height: 90vh; overflow-y: auto;
+  }
+}
+
+/* ── Size picker ── */
+.sizePicker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.sizeBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--paper-dark);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.sizeBtn:hover { border-color: var(--primary); background: var(--paper); }
+.sizeBtnActive {
+  border-color: var(--primary) !important;
+  background: white !important;
+  box-shadow: 0 0 0 3px hsla(22, 35%, 32%, 0.12);
+}
+
+/* Mini grid preview inside each button */
+.sizePreview {
+  width: 40px;
+  height: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  padding: 2px;
+}
+
+.sizeBlock {
+  background: var(--primary);
+  border-radius: 3px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.sizeBtnActive .sizeBlock { opacity: 1; }
+
+.sizeBtnLabel {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sizeBtnDesc {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.03em;
+}

@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import GardenPage from './pages/GardenPage';
 import TopicPage from './pages/TopicPage';
+import DiscoverPage from './pages/DiscoverPage';
 import AuthModal from './components/AuthModal';
 import OnboardingModal from './components/OnboardingModal';
 
@@ -13,7 +14,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'garden' | 'topic'
+  const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'garden' | 'topic' | 'discover'
   const [gardenUsername, setGardenUsername] = useState(null);
   const [currentTopic, setCurrentTopic] = useState(null);
   const [gardenTopics, setGardenTopics] = useState([]);
@@ -34,7 +35,11 @@ export default function App() {
   }, []);
 
   function checkPageFromUrl() {
-    const path = window.location.pathname.replace('/', '');
+    const path = window.location.pathname.replace(/^\//, '');
+    if (path === 'gardens' || path === 'discover') {
+      setCurrentPage('discover');
+      return;
+    }
     const parts = path.split('/');
     if (parts[0]) {
       setGardenUsername(parts[0]);
@@ -45,6 +50,14 @@ export default function App() {
         setCurrentPage('garden');
       }
     }
+  }
+
+  function navigateToDiscover() {
+    setCurrentPage('discover');
+    setGardenUsername(null);
+    setCurrentTopic(null);
+    setGardenTopics([]);
+    window.history.pushState({}, '', '/gardens');
   }
 
   async function handlePlantClick() {
@@ -103,15 +116,16 @@ export default function App() {
         session={session}
         onAuthClick={() => setShowAuth(true)}
         onLogoClick={goHome}
-        gardenTopics={currentPage !== 'home' ? gardenTopics : []}
-        gardenUsername={currentPage !== 'home' ? gardenUsername : null}
+        onDiscoverClick={navigateToDiscover}
+        gardenTopics={currentPage !== 'home' && currentPage !== 'discover' ? gardenTopics : []}
+        gardenUsername={currentPage !== 'home' && currentPage !== 'discover' ? gardenUsername : null}
         activeTopic={currentPage === 'topic' ? currentTopic : gardenUsername}
         onTopicClick={(t) => {
           if (t === gardenUsername) { goToGarden(); }
           else { navigateToTopic(t); }
         }}
         isOwnerGarden={
-          currentPage !== 'home' &&
+          currentPage !== 'home' && currentPage !== 'discover' &&
           session?.user &&
           (session.user.user_metadata?.username === gardenUsername ||
            session.user.email?.split('@')[0] === gardenUsername)
@@ -122,6 +136,15 @@ export default function App() {
 
       {currentPage === 'home' && (
         <HomePage onAuthClick={handlePlantClick} />
+      )}
+
+      {currentPage === 'discover' && (
+        <DiscoverPage onVisitGarden={(username) => {
+          setGardenUsername(username);
+          setCurrentPage('garden');
+          setGardenTopics([]);
+          window.history.pushState({}, '', `/${username}`);
+        }} />
       )}
 
       {currentPage === 'garden' && (

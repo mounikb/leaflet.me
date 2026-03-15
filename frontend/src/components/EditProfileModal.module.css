@@ -144,3 +144,25 @@
 }
 .saveBtn:hover { background: var(--orchid); }
 .saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Bio counter ── */
+.charCount {
+  text-align: right;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 6px;
+}
+.charWarn { color: var(--orchid); font-weight: 600; }
+
+/* ── Topic count ── */
+.limitCount   { color: var(--ink-faint); font-size: 12px; }
+.limitReached { color: var(--orchid); font-size: 12px; font-weight: 600; }
+
+@media (max-width: 640px) {
+  .overlay { align-items: flex-end; padding: 0; }
+  .modal {
+    max-width: 100%; border-radius: 20px 20px 0 0;
+    padding: 28px 20px 36px; max-height: 90vh; overflow-y: auto;
+  }
+}

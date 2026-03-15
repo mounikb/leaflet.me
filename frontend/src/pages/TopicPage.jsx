@@ -4,6 +4,7 @@ import AddCardModal from '../components/AddCardModal';
 import CardModal from '../components/CardModal';
 import EditCardModal from '../components/EditCardModal';
 import styles from './TopicPage.module.css';
+import { computeLayout } from '../lib/gridLayout';
 
 export default function TopicPage({ username, topic, session, dragMode }) {
   const [profile, setProfile]       = useState(null);
@@ -136,7 +137,7 @@ export default function TopicPage({ username, topic, session, dragMode }) {
 
       {cards.length > 0 ? (
         <div className={`${styles.grid} ${dragMode && isOwner ? styles.dragActive : ''}`}>
-          {cards.map((card, idx) => (
+          {computeLayout(cards).map((card, idx) => (
             <div
               key={card.id}
               className={`
@@ -146,6 +147,10 @@ export default function TopicPage({ username, topic, session, dragMode }) {
                 ${draggingId === card.id ? styles.isDragging : ''}
                 ${dragMode && overIdx === idx && draggingId !== card.id ? styles.isDragOver : ''}
               `}
+              style={{
+                gridColumn: card.gridColumn,
+                gridRow: card.gridRow,
+              }}
               draggable={dragMode && isOwner}
               onDragStart={dragMode ? e => onDragStart(e, card) : undefined}
               onDragEnter={dragMode ? e => onDragEnter(e, card) : undefined}
@@ -216,11 +221,18 @@ export default function TopicPage({ username, topic, session, dragMode }) {
         </div>
       ) : (
         <div className={styles.empty}>
-          <p>No cards in {topic} yet.</p>
-          {isOwner && (
-            <button className={styles.addFirstBtn} onClick={() => setShowAddCard(true)}>
-              Plant the first one 🌱
-            </button>
+          {isOwner ? (
+            <>
+              <p>No cards in {topic} yet.</p>
+              <button className={styles.addFirstBtn} onClick={() => setShowAddCard(true)}>
+                Plant the first one 🌱
+              </button>
+            </>
+          ) : (
+            <>
+              <p>Nothing planted here yet.</p>
+              <p className={styles.emptySubtext}>Check back soon — this garden is still growing 🌱</p>
+            </>
           )}
         </div>
       )}

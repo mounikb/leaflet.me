@@ -1,271 +1,142 @@
 .loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60vh;
-  font-size: 48px;
-  animation: pulse 1.5s infinite;
+  display: flex; align-items: center; justify-content: center;
+  height: 60vh; font-size: 48px; animation: pulse 1.5s infinite;
 }
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-.notFound {
-  text-align: center;
-  padding: 120px 40px;
-}
-.notFound h2 {
-  font-family: var(--font-display);
-  font-size: 32px; color: var(--ink); margin-bottom: 12px;
-}
+.notFound { text-align: center; padding: 120px 40px; }
+.notFound h2 { font-family: var(--font-display); font-size: 32px; color: var(--ink); margin-bottom: 12px; }
 .notFound p { color: var(--ink-light); margin-bottom: 24px; }
-.homeLink { color: var(--orchid); font-size: 14px; text-decoration: underline; }
+.homeLink { color: var(--primary); font-size: 14px; text-decoration: underline; }
 
-/* Centered (no pinned cards) */
+/* ── 3-col grid. Intro = col 1. Cards = direct children filling cols 2-3 then all 3 ── */
 .page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 80px 40px;
-}
-
-/* Two-column (pinned cards exist) */
-.page.twoCol {
-  max-width: 1280px;
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 80px;
-  align-items: start;
-  padding: 80px 40px;
-}
-
-/* ── Left intro ── */
-.intro {
-  position: sticky;
-  top: 80px;
-}
-
-.profileName {
-  font-family: var(--font-display);
-  font-size: clamp(36px, 5vw, 56px);
-  font-weight: 300;
-  color: var(--ink);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 260px;
   gap: 12px;
+  padding: 72px 60px 100px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* Intro: col 1, spans 3 rows */
+.intro {
+  grid-column: 1 / 2;
+  grid-row: 1 / span 3;
+  padding: 8px 60px 0 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .editBtn {
-  background: none; border: none;
-  font-size: 18px; cursor: pointer;
-  opacity: 0.3; transition: opacity 0.2s;
-  padding: 4px;
+  background: none; border: none; font-size: 14px;
+  cursor: pointer; opacity: 0.25; transition: opacity 0.2s;
+  padding: 2px 6px; vertical-align: middle;
 }
 .editBtn:hover { opacity: 1; }
 
 .bio {
-  font-family: var(--font-display);
-  font-size: clamp(18px, 2.5vw, 24px);
+  font-family: var(--font-accent);
+  font-size: clamp(24px, 2.8vw, 32px);
   font-weight: 300;
   color: var(--ink-light);
-  line-height: 1.6;
-  margin-bottom: 32px;
+  line-height: 1.85;
   letter-spacing: -0.01em;
-}
-
-/* Topic links */
-.topicList {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.topicLink {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 300;
-  color: var(--ink-light);
-  text-align: left;
-  padding: 6px 0;
-  letter-spacing: -0.01em;
-  transition: color 0.2s;
-  border-bottom: 1px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
-}
-.topicLink:hover {
-  color: var(--ink);
-  border-bottom-color: var(--ink-faint);
-}
-
-.emptyHint {
-  margin-top: 20px;
-  font-size: 14px;
-  color: var(--ink-faint);
-  font-family: var(--font-sans);
   font-style: italic;
 }
 
-/* ── Drag mode ── */
+.emptyHint {
+  font-family: var(--font-sans); font-size: 14px;
+  color: var(--ink-faint); font-style: italic; line-height: 1.6; margin-top: 24px;
+}
+
+/* Drag banner — spans all 3 cols */
 .dragBanner {
-  background: var(--ink);
-  color: var(--paper);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  text-align: center;
-  padding: 10px 20px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-  letter-spacing: 0.02em;
+  grid-column: 1 / -1;
+  background: var(--paper-dark); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 16px;
+  font-size: 13px; color: var(--ink-mid); font-family: var(--font-sans);
 }
 
-.draggable { cursor: grab; }
-.draggable:active { cursor: grabbing; }
-
-.isDragging {
-  opacity: 0.35;
-  transform: scale(0.97) !important;
-  box-shadow: none !important;
+/* Empty state — spans cols 2-3 */
+.noPinned {
+  grid-column: 2 / 4;
+  grid-row: 1 / span 3;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px; color: var(--ink-faint);
+  font-family: var(--font-sans); font-size: 14px; text-align: center;
 }
+.noPinnedIcon { font-size: 40px; opacity: 0.4; }
 
-.isDragOver {
-  outline: 2.5px dashed var(--orchid);
-  outline-offset: 3px;
-  transform: scale(1.02) !important;
-}
-
-.dragHandle {
-  position: absolute;
-  top: 10px; left: 10px;
-  z-index: 10;
-  font-size: 16px;
-  color: rgba(255,255,255,0.9);
-  background: rgba(26,23,20,0.5);
-  backdrop-filter: blur(4px);
-  border-radius: 8px;
-  padding: 4px 7px;
-  line-height: 1;
-  pointer-events: none;
-  letter-spacing: 2px;
-}
-
-/* ── Pinned area ── */
-.pinnedArea { min-width: 0; }
-
-.pinnedLabel {
-  font-family: var(--font-sans);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-light);
-  margin-bottom: 20px;
-}
-
-.masonry {
-  columns: 2;
-  column-gap: 16px;
-}
-
+/* ── Cards — each is a direct grid child with explicit position ── */
 .card {
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-  aspect-ratio: 1 / 1;
-  background: var(--paper-dark);
-  box-shadow: 0 2px 12px rgba(26,23,20,0.08);
-  margin-bottom: 16px;
-  break-inside: avoid;
-  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+  border-radius: 12px; overflow: hidden; cursor: pointer;
+  position: relative; background: var(--paper-dark);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;
+  min-height: 0;
 }
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 16px 40px rgba(26,23,20,0.18);
-}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 
 .cardImg {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  position: absolute;
-  inset: 0;
-  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+  width: 100%; height: 100%; object-fit: cover;
+  position: absolute; inset: 0;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
 }
-.card:hover .cardImg { transform: scale(1.05); }
+.card:hover .cardImg { transform: scale(1.04); }
 
 .cardOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(20,17,14,0.82) 0%,
-    rgba(20,17,14,0.1) 55%,
-    transparent 100%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 20px;
-  gap: 4px;
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(20,17,14,0.80) 0%, transparent 55%);
+  opacity: 0; transition: opacity 0.3s;
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 16px;
 }
 .card:hover .cardOverlay { opacity: 1; }
 
 .cardTopic {
-  font-size: 11px;
-  color: rgba(255,255,255,0.6);
-  font-family: var(--font-sans);
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(255,255,255,0.65);
+  font-family: var(--font-sans); margin-bottom: 4px;
 }
-
 .cardTitle {
   font-family: var(--font-display);
-  font-size: 19px;
-  font-weight: 400;
-  color: white;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  font-size: 16px; font-weight: 400; color: white; line-height: 1.25;
 }
-
-/* No-image fallback */
 .cardNoImage {
-  background: white;
-  border: 1px solid rgba(26,23,20,0.07);
-  aspect-ratio: unset;
-  min-height: 160px;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  gap: 8px;
+  padding: 20px; display: flex; flex-direction: column; gap: 8px; height: 100%;
 }
 .cardNoImage .cardTopic {
-  font-size: 11px; color: var(--orchid);
-  font-weight: 600; letter-spacing: 0.1em;
-  text-transform: uppercase; font-family: var(--font-sans);
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--primary); font-family: var(--font-sans);
 }
 .cardNoImage .cardTitle {
   font-family: var(--font-display);
-  font-size: 18px; font-weight: 400;
-  color: var(--ink); line-height: 1.3;
+  font-size: 18px; font-weight: 400; color: var(--ink); line-height: 1.3;
 }
 .cardText {
-  font-family: var(--font-display);
-  font-size: 14px; color: var(--ink-mid); line-height: 1.7;
+  font-family: var(--font-sans); font-size: 13px; color: var(--ink-light); line-height: 1.65;
 }
 
-@media (max-width: 1024px) {
-  .page.twoCol { grid-template-columns: 1fr; gap: 40px; }
-  .intro { position: static; }
+/* Drag */
+.draggable { cursor: grab; }
+.draggable:active { cursor: grabbing; }
+.isDragging { opacity: 0.4; transform: scale(0.97); }
+.dragHandle {
+  position: absolute; top: 10px; left: 10px;
+  font-size: 18px; color: white; opacity: 0.7;
+  cursor: grab; z-index: 10; text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .page { grid-template-columns: repeat(2, 1fr); padding: 48px 32px 80px; }
+  .intro { grid-column: 1 / 2; grid-row: 1 / span 2; padding-right: 32px; }
+  .noPinned { grid-column: 2 / 3; grid-row: 1 / span 2; }
 }
 @media (max-width: 640px) {
-  .page, .page.twoCol { padding: 48px 20px; }
-  .masonry { columns: 1; }
+  .page { grid-template-columns: 1fr; padding: 40px 20px 60px; }
+  .intro { grid-column: 1; grid-row: auto; grid-row-end: auto; padding-right: 0; margin-bottom: 8px; }
+  .noPinned { grid-column: 1; }
 }
