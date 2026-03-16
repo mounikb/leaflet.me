@@ -6,12 +6,13 @@ import ConfirmModal from './ConfirmModal';
 
 const DEFAULT_LINKS = [
   { label: 'Gardens', href: '/gardens' },
+  { label: 'About',   href: '/about' },
 ];
 
 export default function Navbar({
   session, onAuthClick, onLogoClick, onDiscoverClick,
   gardenTopics, gardenUsername, activeTopic, onTopicClick,
-  onDragModeToggle, dragMode, isOwnerGarden
+  onDragModeToggle, dragMode, isOwnerGarden, onAboutClick
 }) {
   const [scrolled, setScrolled]         = useState(false);
   const [menuOpen, setMenuOpen]         = useState(false);
@@ -84,6 +85,8 @@ export default function Navbar({
               <li key={link.label}>
                 {link.label === 'Gardens' ? (
                   <button className={styles.link} onClick={onDiscoverClick}>{link.label}</button>
+                ) : link.label === 'About' ? (
+                  <button className={styles.link} onClick={onAboutClick}>{link.label}</button>
                 ) : (
                   <a href={link.href} className={styles.link}>{link.label}</a>
                 )}
@@ -208,6 +211,7 @@ export default function Navbar({
           ) : (
             <>
               <button className={styles.mobileLink} onClick={() => { onDiscoverClick?.(); setMobileOpen(false); }}>Gardens</button>
+              <button className={styles.mobileLink} onClick={() => { onAboutClick?.(); setMobileOpen(false); }}>About</button>
             </>
           )}
 

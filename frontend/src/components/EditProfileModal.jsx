@@ -42,10 +42,22 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
     setPendingRemove(null);
   }
 
+  const [customTopicError, setCustomTopicError] = useState('');
+
   function addCustomTopic() {
     const t = customTopic.trim();
-    if (t && !topics.includes(t) && topics.length < 7) setTopics(prev => [...prev, t]);
+    if (!t) return;
+    const normalized = t.toLowerCase();
+    const isDuplicate = DEFAULT_TOPICS.some(d => d.toLowerCase() === normalized) ||
+      topics.some(existing => existing.toLowerCase() === normalized);
+    if (isDuplicate) {
+      setCustomTopicError('This topic already exists.');
+      return;
+    }
+    if (topics.length >= 7) { setCustomTopicError('Max 7 topics.'); return; }
+    setTopics(prev => [...prev, t]);
     setCustomTopic('');
+    setCustomTopicError('');
     setShowCustomInput(false);
   }
 
@@ -138,13 +150,14 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
               {showCustomInput ? (
                 <div className={styles.customWrap}>
                   <input className={styles.customInput} placeholder="e.g. Ceramics..."
-                    value={customTopic} onChange={e => setCustomTopic(e.target.value)}
+                    value={customTopic} onChange={e => { setCustomTopic(e.target.value); setCustomTopicError(''); }}
                     onKeyDown={e => e.key === 'Enter' && addCustomTopic()} autoFocus />
                   <button className={styles.customAddBtn} onClick={addCustomTopic}>Add</button>
                 </div>
               ) : (
                 <button className={styles.plusBtn} onClick={() => setShowCustomInput(true)}>+ Custom</button>
               )}
+              {customTopicError && <p style={{fontFamily:'var(--font-sans)',fontSize:'12px',color:'hsl(0,65%,45%)',marginTop:'4px'}}>{customTopicError}</p>}
             </div>
           </div>
         )}

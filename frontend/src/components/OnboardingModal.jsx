@@ -12,6 +12,7 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
   const [step, setStep] = useState(1); // 1 = intro, 2 = topics, 3 = about
   const [selectedTopics, setSelectedTopics] = useState([]);
   const [customTopic, setCustomTopic] = useState('');
+  const [customTopicError, setCustomTopicError] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [bio, setBio] = useState('');
   const [saving, setSaving] = useState(false);
@@ -26,10 +27,15 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
 
   function addCustomTopic() {
     const t = customTopic.trim();
-    if (t && !selectedTopics.includes(t) && selectedTopics.length < 7) {
-      setSelectedTopics(prev => [...prev, t]);
-    }
+    if (!t) return;
+    const normalized = t.toLowerCase();
+    const isDuplicate = DEFAULT_TOPICS.some(d => d.toLowerCase() === normalized) ||
+      selectedTopics.some(existing => existing.toLowerCase() === normalized);
+    if (isDuplicate) { setCustomTopicError('This topic already exists.'); return; }
+    if (selectedTopics.length >= 7) { setCustomTopicError('Max 7 topics.'); return; }
+    setSelectedTopics(prev => [...prev, t]);
     setCustomTopic('');
+    setCustomTopicError('');
     setShowCustomInput(false);
   }
 
@@ -38,9 +44,16 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
     // Always read username from profiles table — handles Google OAuth correctly
     const { data: existing } = await supabase
       .from('profiles').select('username').eq('id', session.user.id).single();
-    const username = existing?.username
+    let username = existing?.username
       || session.user.user_metadata?.username
       || session.user.email.split('@')[0];
+
+    // If username not yet set, ensure it's unique
+    if (!existing?.username) {
+      const { data: taken } = await supabase
+        .from('profiles').select('id').eq('username', username).neq('id', session.user.id).maybeSingle();
+      if (taken) username = username + '_' + Math.random().toString(36).slice(2, 6);
+    }
 
     await supabase.from('profiles').upsert({
       id: session.user.id,
@@ -57,9 +70,16 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
   async function handleSkip() {
     const { data: existing } = await supabase
       .from('profiles').select('username').eq('id', session.user.id).single();
-    const username = existing?.username
+    let username = existing?.username
       || session.user.user_metadata?.username
       || session.user.email.split('@')[0];
+
+    if (!existing?.username) {
+      const { data: taken } = await supabase
+        .from('profiles').select('id').eq('username', username).neq('id', session.user.id).maybeSingle();
+      if (taken) username = username + '_' + Math.random().toString(36).slice(2, 6);
+    }
+
     await supabase.from('profiles').upsert({
       id: session.user.id,
       username,
@@ -147,7 +167,7 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
                     className={styles.customInput}
                     placeholder="e.g. Ceramics..."
                     value={customTopic}
-                    onChange={e => setCustomTopic(e.target.value)}
+                    onChange={e => { setCustomTopic(e.target.value); setCustomTopicError(''); }}
                     onKeyDown={e => e.key === 'Enter' && addCustomTopic()}
                     autoFocus
                   />
@@ -158,6 +178,7 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
                   + Custom
                 </button>
               )}
+              {customTopicError && <p style={{fontFamily:'var(--font-sans)',fontSize:'12px',color:'hsl(0,65%,45%)',marginTop:'4px'}}>{customTopicError}</p>}
             </div>
 
             <div className={styles.actions}>

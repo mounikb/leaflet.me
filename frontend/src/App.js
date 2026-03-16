@@ -179,6 +179,7 @@ export default function App() {
         onAuthClick={() => setShowAuth(true)}
         onLogoClick={goHome}
         onDiscoverClick={navigateToDiscover}
+        onAboutClick={() => { setGardenUsername('leaflet'); setCurrentTopic(null); setCurrentPage('garden'); setGardenTopics([]); setGardenRefreshKey(k => k+1); window.history.pushState({}, '', '/leaflet'); }}
         gardenTopics={currentPage !== 'home' && currentPage !== 'discover' ? gardenTopics : []}
         gardenUsername={currentPage !== 'home' && currentPage !== 'discover' ? gardenUsername : null}
         activeTopic={currentPage === 'topic' ? currentTopic : gardenUsername}
