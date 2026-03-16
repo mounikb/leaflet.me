@@ -105,3 +105,104 @@
   .title { font-size: 22px; }
   .content { font-size: 15px; }
 }
+
+/* ── Book modal layout ── */
+.bookModal {
+  display: flex;
+  gap: 28px;
+  padding: 32px 36px 36px;
+  align-items: flex-start;
+}
+
+.bookCoverWrap {
+  flex-shrink: 0;
+  position: relative;
+  width: 130px;
+  perspective: 800px;
+}
+
+.bookCover {
+  width: 130px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 3px 6px 6px 3px;
+  box-shadow: 4px 6px 24px rgba(0,0,0,0.22);
+  outline: 1px solid rgba(0,0,0,0.07);
+  display: block;
+}
+
+.bookCoverSpine {
+  position: absolute;
+  top: 0; left: 0;
+  width: 8px; height: 100%;
+  background: rgba(0,0,0,0.12);
+  border-radius: 3px 0 0 3px;
+  filter: blur(2px);
+}
+
+.bookInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.bookStatus {
+  display: inline-block;
+  align-self: flex-start;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.bookTitle {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.bookAuthor {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink-light);
+}
+
+.bookStars {
+  display: flex;
+  gap: 2px;
+}
+
+.bookReview {
+  font-family: var(--font-accent);
+  font-size: 16px;
+  color: var(--ink-mid);
+  line-height: 1.75;
+  font-style: italic;
+  border-top: 1px solid var(--paper-deeper);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.bookExtLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  background: hsla(22,35%,32%,0.08);
+  padding: 6px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  align-self: flex-start;
+  transition: background 0.2s;
+}
+.bookExtLink:hover { background: hsla(22,35%,32%,0.15); }

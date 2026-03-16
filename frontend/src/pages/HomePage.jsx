@@ -1,6 +1,6 @@
 import React from 'react';
 import Hero from '../components/Hero';
 
-export default function HomePage({ onAuthClick }) {
-  return <Hero onAuthClick={onAuthClick} />;
+export default function HomePage({ onAuthClick, planting }) {
+  return <Hero onAuthClick={onAuthClick} planting={planting} />;
 }

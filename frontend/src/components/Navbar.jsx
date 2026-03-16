@@ -1,19 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './Navbar.module.css';
+import Icon from './Icons';
+import ConfirmModal from './ConfirmModal';
 
 const DEFAULT_LINKS = [
   { label: 'Gardens', href: '/gardens' },
-  { label: 'Topics',  href: '/topics' },
-  { label: 'About',   href: '/about' },
-];
-
-const THEMES = [
-  { id: 'default', label: 'Parchment', color: '#f5f0e8' },
-  { id: 'dark',    label: 'Midnight',  color: '#1a1714' },
-  { id: 'sage',    label: 'Sage',      color: '#e8ede6' },
-  { id: 'rose',    label: 'Rose',      color: '#f5ece8' },
-  { id: 'slate',   label: 'Slate',     color: '#e8ecef' },
 ];
 
 export default function Navbar({
@@ -24,8 +16,7 @@ export default function Navbar({
   const [scrolled, setScrolled]         = useState(false);
   const [menuOpen, setMenuOpen]         = useState(false);
   const [mobileOpen, setMobileOpen]     = useState(false);
-  const [showThemes, setShowThemes]     = useState(false);
-  const [activeTheme, setActiveTheme]   = useState(() => localStorage.getItem('leaflet-theme') || 'default');
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -39,31 +30,29 @@ export default function Navbar({
     function handleClick(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
-        setShowThemes(false);
+       
       }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Apply theme to root
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', activeTheme);
-    localStorage.setItem('leaflet-theme', activeTheme);
-  }, [activeTheme]);
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    setShowSignOutConfirm(true);
+    setMenuOpen(false);
+    setMobileOpen(false);
   }
 
-  function selectTheme(id) {
-    setActiveTheme(id);
-    setShowThemes(false);
+  async function confirmSignOut() {
+    setShowSignOutConfirm(false);
+    await supabase.auth.signOut();
   }
 
   const isGardenPage = gardenTopics && gardenTopics.length > 0;
 
   return (
+    <>
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
       <nav className={styles.nav}>
 
@@ -71,10 +60,11 @@ export default function Navbar({
         <ul className={styles.leftLinks}>
           <li>
             <a href="/"
-              onClick={onLogoClick ? (e) => { e.preventDefault(); onLogoClick(); } : undefined}
-              className={`${styles.link} ${styles.primary}`}
+              onClick={(e) => { e.preventDefault(); onLogoClick?.(); }}
+              className={styles.logoLink}
             >
-              Leaflet
+              <img src="/leaflet-icon.png" alt="Leaflet" className={styles.logoIcon} />
+              <span className={styles.logoText}>Leaflet</span>
             </a>
           </li>
 
@@ -111,10 +101,10 @@ export default function Navbar({
                 <li className={styles.menuWrap} ref={menuRef}>
                   <button
                     className={`${styles.settingsBtn} ${menuOpen ? styles.settingsBtnActive : ''}`}
-                    onClick={() => { setMenuOpen(o => !o); setShowThemes(false); }}
+                    onClick={() => { setMenuOpen(o => !o); }}
                     title="Garden settings"
                   >
-                    <span className={styles.settingsIcon}>⚙</span>
+                    <Icon name="settings" size={14} />
                     Customise
                   </button>
 
@@ -122,31 +112,6 @@ export default function Navbar({
                     <div className={styles.dropdown}>
                       <div className={styles.dropdownHeader}>Your Garden</div>
 
-                      {/* Theme picker */}
-                      <button className={styles.dropItem} onClick={() => setShowThemes(o => !o)}>
-                        <span className={styles.dropIcon}>🎨</span>
-                        <span className={styles.dropLabel}>
-                          Theme
-                          <span className={styles.dropSub}>
-                            {THEMES.find(t => t.id === activeTheme)?.label}
-                          </span>
-                        </span>
-                        <span className={styles.dropChevron}>{showThemes ? '▲' : '▼'}</span>
-                      </button>
-
-                      {showThemes && (
-                        <div className={styles.themeGrid}>
-                          {THEMES.map(t => (
-                            <button
-                              key={t.id}
-                              className={`${styles.themeDot} ${activeTheme === t.id ? styles.themeDotActive : ''}`}
-                              style={{ background: t.color }}
-                              onClick={() => selectTheme(t.id)}
-                              title={t.label}
-                            />
-                          ))}
-                        </div>
-                      )}
 
                       <div className={styles.dropDivider} />
 
@@ -155,7 +120,7 @@ export default function Navbar({
                         className={`${styles.dropItem} ${dragMode ? styles.dropItemActive : ''}`}
                         onClick={() => { onDragModeToggle?.(); setMenuOpen(false); }}
                       >
-                        <span className={styles.dropIcon}>⠿</span>
+                        <Icon name="drag" size={14} />
                         <span className={styles.dropLabel}>
                           Reorder cards
                           <span className={styles.dropSub}>{dragMode ? 'Drag mode on — click to exit' : 'Drag cards to rearrange'}</span>
@@ -165,7 +130,7 @@ export default function Navbar({
 
                       {/* Edit bio */}
                       <button className={styles.dropItem} onClick={() => { window.dispatchEvent(new CustomEvent('leaflet:editbio')); setMenuOpen(false); }}>
-                        <span className={styles.dropIcon}>✏️</span>
+                        <Icon name="pencil" size={14} />
                         <span className={styles.dropLabel}>
                           Edit bio
                           <span className={styles.dropSub}>Update your intro text</span>
@@ -174,7 +139,7 @@ export default function Navbar({
 
                       {/* Manage topics */}
                       <button className={styles.dropItem} onClick={() => { window.dispatchEvent(new CustomEvent('leaflet:edittopics')); setMenuOpen(false); }}>
-                        <span className={styles.dropIcon}>🌿</span>
+                        <Icon name="leaf" size={14} />
                         <span className={styles.dropLabel}>
                           Manage topics
                           <span className={styles.dropSub}>Add or remove topics</span>
@@ -185,7 +150,7 @@ export default function Navbar({
 
                       {/* Sign out */}
                       <button className={`${styles.dropItem} ${styles.dropItemDanger}`} onClick={handleSignOut}>
-                        <span className={styles.dropIcon}>→</span>
+                        <Icon name="signOut" size={14} />
                         <span className={styles.dropLabel}>Sign out</span>
                       </button>
                     </div>
@@ -243,8 +208,6 @@ export default function Navbar({
           ) : (
             <>
               <button className={styles.mobileLink} onClick={() => { onDiscoverClick?.(); setMobileOpen(false); }}>Gardens</button>
-              <a href="/topics" className={styles.mobileLink}>Topics</a>
-              <a href="/about" className={styles.mobileLink}>About</a>
             </>
           )}
 
@@ -269,5 +232,18 @@ export default function Navbar({
         </div>
       )}
     </header>
+
+      {showSignOutConfirm && (
+        <ConfirmModal
+          title="Sign out of Leaflet?"
+          message="You'll need to sign back in to access your garden."
+          confirmLabel="Sign out"
+          cancelLabel="Stay"
+          danger
+          onConfirm={confirmSignOut}
+          onCancel={() => setShowSignOutConfirm(false)}
+        />
+      )}
+    </>
   );
 }

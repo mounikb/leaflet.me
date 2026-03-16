@@ -180,3 +180,24 @@
     padding: 28px 20px 36px; max-height: 90vh; overflow-y: auto;
   }
 }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.select {
+  background: var(--paper-dark);
+  border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 10px 14px;
+  font-family: var(--font-sans); font-size: 14px;
+  color: var(--ink); outline: none;
+  transition: border-color 0.2s;
+}
+.select:focus { border-color: var(--primary); }
+
+.stars { display: flex; gap: 4px; padding: 6px 0; }
+.star {
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; color: var(--paper-deeper);
+  transition: color 0.15s, transform 0.15s; padding: 0;
+}
+.starFilled { color: #D4A017; }
+.star:hover { transform: scale(1.2); }

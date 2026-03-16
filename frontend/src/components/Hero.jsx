@@ -1,5 +1,6 @@
 import React from 'react';
 import heroImg from '../assets/hero-cottage.jpg';
+import Icon from './Icons';
 import styles from './Hero.module.css';
 
 const PREVIEW_CARDS = [
@@ -12,39 +13,12 @@ const PREVIEW_CARDS = [
 ];
 
 const HOW_ITEMS = [
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
-        <path d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
-      </svg>
-    ),
-    title: 'Plant your ideas',
-    desc: 'Start with a seed — a thought, a bookmark, a sketch. Watch it grow into something meaningful over time.'
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-      </svg>
-    ),
-    title: "Curate, don't perform",
-    desc: 'No likes, no followers. Just a quiet space to collect the things that matter to you.'
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20h9"/>
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-      </svg>
-    ),
-    title: 'Write at your own pace',
-    desc: 'No publishing pressure. Add a sentence today, a paragraph next week. Your garden grows with you.'
-  },
+  { icon: 'seedling', title: 'Plant your ideas',       desc: 'Start with a seed — a thought, a bookmark, a sketch. Watch it grow into something meaningful over time.' },
+  { icon: 'book',     title: "Curate, don't perform",  desc: 'No likes, no followers. Just a quiet space to collect the things that matter to you.' },
+  { icon: 'pencil',   title: 'Write at your own pace', desc: 'No publishing pressure. Add a sentence today, a paragraph next week. Your garden grows with you.' },
 ];
 
-export default function Hero({ onAuthClick }) {
+export default function Hero({ onAuthClick, planting }) {
   return (
     <div className={styles.page}>
 
@@ -64,8 +38,8 @@ export default function Hero({ onAuthClick }) {
           </p>
 
           <div className={styles.heroCta}>
-            <button onClick={onAuthClick} className={styles.btnPrimary}>
-              Plant your garden →
+            <button onClick={onAuthClick} className={styles.btnPrimary} disabled={planting}>
+              {planting ? 'Opening garden...' : 'Plant your garden →'}
             </button>
             <button onClick={onAuthClick} className={styles.btnOutline}>
               Explore gardens
@@ -117,7 +91,7 @@ export default function Hero({ onAuthClick }) {
         <div className={styles.howGrid}>
           {HOW_ITEMS.map(({ icon, title, desc }) => (
             <div key={title} className={styles.howCard}>
-              <div className={styles.howIconWrap}>{icon}</div>
+              <div className={styles.howIconWrap}><Icon name={icon} size={20} color="hsl(22,35%,35%)" /></div>
               <h3 className={styles.howCardTitle}>{title}</h3>
               <p className={styles.howCardDesc}>{desc}</p>
             </div>
@@ -143,8 +117,8 @@ export default function Hero({ onAuthClick }) {
             and your ideas, growing at their own pace.
           </p>
           <div className={styles.ctaButtons}>
-            <button onClick={onAuthClick} className={styles.btnPrimary}>
-              Plant your garden →
+            <button onClick={onAuthClick} className={styles.btnPrimary} disabled={planting}>
+              {planting ? 'Opening garden...' : 'Plant your garden →'}
             </button>
             <button onClick={onAuthClick} className={styles.btnOutline}>
               See examples

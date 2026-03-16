@@ -166,3 +166,63 @@
     padding: 28px 20px 36px; max-height: 90vh; overflow-y: auto;
   }
 }
+
+/* ── Topic removal warning ── */
+.warningBox {
+  background: #FFF8F0;
+  border: 1.5px solid #E8C090;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.warningTitle {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.warningText {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-mid);
+  line-height: 1.6;
+}
+.warningText strong { color: var(--ink); font-weight: 600; }
+
+.warningActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.warningCancel {
+  background: var(--paper-dark);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.warningCancel:hover { background: var(--paper-deeper); }
+
+.warningConfirm {
+  background: #8B2D20;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.warningConfirm:hover { background: #6B1F15; }

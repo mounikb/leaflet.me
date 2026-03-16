@@ -128,3 +128,12 @@ body { background: hsl(38, 25%, 88%) !important; }
   box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 8px 48px rgba(0,0,0,0.08);
   /* overflow: hidden removed — breaks sticky + grid */
 }
+
+/* ── Mobile global fixes ── */
+@media (max-width: 640px) {
+  /* Prevent horizontal scroll */
+  body { overflow-x: hidden; }
+  
+  /* Modals full screen on mobile */
+  .modal { border-radius: 16px 16px 0 0 !important; max-height: 95vh !important; }
+}

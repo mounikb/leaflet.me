@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './DiscoverPage.module.css';
+import Icon from '../components/Icons';
 
 const BANNER_COLORS = [
   '#C9B99A', '#A8B5A0', '#B5A8B5', '#C4A882',
@@ -25,6 +26,8 @@ export default function DiscoverPage({ onVisitGarden }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [focused, setFocused] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 24;
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -33,7 +36,8 @@ export default function DiscoverPage({ onVisitGarden }) {
         .from('profiles')
         .select('username, bio, topics')
         .eq('onboarded', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(0, 23); // load first 24
       setGardens(data || []);
       setLoading(false);
     }
@@ -49,7 +53,7 @@ export default function DiscoverPage({ onVisitGarden }) {
       )
     : gardens;
 
-  if (loading) return <div className={styles.loading}><span>🌱</span></div>;
+  if (loading) return <div className={styles.loading}><Icon name="seedling" size={40} color="hsl(22,35%,45%)" /></div>;
 
   return (
     <div className={styles.page}>
@@ -71,7 +75,7 @@ export default function DiscoverPage({ onVisitGarden }) {
             className={styles.search}
             placeholder="Search by name, topic, or bio..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => { setSearch(e.target.value); setPage(1); }}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
           />
@@ -102,11 +106,11 @@ export default function DiscoverPage({ onVisitGarden }) {
         <div className={styles.empty}>
           {q
             ? <>No gardens match <strong>"{search}"</strong> 🌿</>
-            : 'No gardens yet. Be the first! 🌱'}
+            : 'No gardens yet. Be the first!'}
         </div>
       ) : (
         <div className={styles.grid}>
-          {filtered.map((garden, i) => (
+          {filtered.slice(0, page * PAGE_SIZE).map((garden, i) => (
             <button
               key={garden.username}
               className={styles.card}
@@ -149,6 +153,24 @@ export default function DiscoverPage({ onVisitGarden }) {
               </div>
             </button>
           ))}
+        </div>
+      )}
+
+      {!q && gardens.length >= page * PAGE_SIZE && (
+        <div className={styles.loadMoreWrap}>
+          <button className={styles.loadMoreBtn} onClick={async () => {
+            const next = page + 1;
+            const { data } = await supabase
+              .from('profiles')
+              .select('username, bio, topics')
+              .eq('onboarded', true)
+              .order('created_at', { ascending: false })
+              .range(0, next * PAGE_SIZE - 1);
+            setGardens(data || []);
+            setPage(next);
+          }}>
+            Load more gardens
+          </button>
         </div>
       )}
     </div>

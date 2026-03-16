@@ -1,0 +1,37 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  gap: 16px;
+  text-align: center;
+  padding: 40px;
+}
+
+.icon { margin-bottom: 8px; }
+
+.title {
+  font-family: var(--font-display);
+  font-size: 36px; font-weight: 400;
+  color: var(--ink); letter-spacing: -0.02em;
+}
+
+.sub {
+  font-family: var(--font-sans);
+  font-size: 15px; color: var(--ink-light);
+  line-height: 1.7; max-width: 360px;
+}
+
+.btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-family: var(--font-sans);
+  font-size: 14px; color: var(--ink-mid);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn:hover { border-color: var(--ink-mid); color: var(--ink); }

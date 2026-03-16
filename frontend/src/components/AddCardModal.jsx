@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './AddCardModal.module.css';
+import Icon from './Icons';
 
 const SIZE_OPTIONS = [
   { value: '1x1', label: '1×1', desc: 'Default', cols: 1, rows: 1 },
@@ -72,12 +73,14 @@ export default function AddCardModal({ session, topics, onClose, onCardAdded }) 
         <h2 className={styles.title}>Add a card</h2>
         <p className={styles.sub}>Plant a new idea in your garden.</p>
 
-        <div className={styles.field}>
-          <label className={styles.label}>Topic</label>
-          <select className={styles.select} value={topic} onChange={e => setTopic(e.target.value)}>
-            {topics.map(t => <option key={t}>{t}</option>)}
-          </select>
-        </div>
+        {topics.length > 1 && (
+          <div className={styles.field}>
+            <label className={styles.label}>Topic</label>
+            <select className={styles.select} value={topic} onChange={e => setTopic(e.target.value)}>
+              {topics.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </div>
+        )}
 
         <div className={styles.field}>
           <label className={styles.label}>Title</label>
@@ -128,7 +131,7 @@ export default function AddCardModal({ session, topics, onClose, onCardAdded }) 
             </div>
           ) : (
             <label className={styles.uploadBtn}>
-              📎 Attach image
+              <Icon name="paperclip" size={13} /> Attach image
               <input type="file" accept="image/*" onChange={handleImage} hidden />
             </label>
           )}
@@ -139,7 +142,7 @@ export default function AddCardModal({ session, topics, onClose, onCardAdded }) 
         <div className={styles.actions}>
           <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
           <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
-            {saving ? 'Planting...' : 'Plant this card 🌱'}
+            {saving ? 'Planting...' : 'Plant this card'}
           </button>
         </div>
 

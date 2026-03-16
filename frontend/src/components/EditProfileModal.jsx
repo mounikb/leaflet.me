@@ -8,22 +8,43 @@ const DEFAULT_TOPICS = [
 ];
 
 export default function EditProfileModal({ profile, initialTab = 'bio', onClose, onSaved }) {
-  const [tab, setTab] = useState(initialTab);
-  const [bio, setBio] = useState(profile?.bio || '');
-  const [topics, setTopics] = useState(profile?.topics || []);
+  const [tab, setTab]                 = useState(initialTab);
+  const [bio, setBio]                 = useState(profile?.bio || '');
+  const [topics, setTopics]           = useState(profile?.topics || []);
   const [customTopic, setCustomTopic] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving]           = useState(false);
+  // Topics pending removal — need user confirmation
+  const [pendingRemove, setPendingRemove] = useState(null); // topic name
 
   function toggleTopic(topic) {
-    setTopics(prev =>
-      prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]
-    );
+    if (topics.includes(topic)) {
+      // Removing — show warning first
+      setPendingRemove(topic);
+    } else {
+      if (topics.length >= 7) return;
+      setTopics(prev => [...prev, topic]);
+    }
+  }
+
+  async function confirmRemove() {
+    const topic = pendingRemove;
+    // Delete all cards for this topic
+    const { data: prof } = await supabase
+      .from('profiles').select('id').eq('id', profile.id).single();
+    if (prof) {
+      await supabase.from('cards')
+        .delete()
+        .eq('user_id', profile.id)
+        .eq('topic', topic);
+    }
+    setTopics(prev => prev.filter(t => t !== topic));
+    setPendingRemove(null);
   }
 
   function addCustomTopic() {
     const t = customTopic.trim();
-    if (t && !topics.includes(t)) setTopics(prev => [...prev, t]);
+    if (t && !topics.includes(t) && topics.length < 7) setTopics(prev => [...prev, t]);
     setCustomTopic('');
     setShowCustomInput(false);
   }
@@ -48,14 +69,29 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
         <button className={styles.close} onClick={onClose}>✕</button>
         <h2 className={styles.title}>Edit your garden</h2>
 
+        {/* ── Topic removal warning ── */}
+        {pendingRemove && (
+          <div className={styles.warningBox}>
+            <p className={styles.warningTitle}>⚠️ Delete "{pendingRemove}"?</p>
+            <p className={styles.warningText}>
+              All cards in <strong>{pendingRemove}</strong> will be permanently deleted.
+              This cannot be undone.
+            </p>
+            <div className={styles.warningActions}>
+              <button className={styles.warningCancel} onClick={() => setPendingRemove(null)}>
+                Keep topic
+              </button>
+              <button className={styles.warningConfirm} onClick={confirmRemove}>
+                Yes, delete everything
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className={styles.tabs}>
-          <button className={`${styles.tab} ${tab === 'bio' ? styles.tabActive : ''}`} onClick={() => setTab('bio')}>
-            Bio
-          </button>
-          <button className={`${styles.tab} ${tab === 'topics' ? styles.tabActive : ''}`} onClick={() => setTab('topics')}>
-            Topics
-          </button>
+          <button className={`${styles.tab} ${tab === 'bio' ? styles.tabActive : ''}`} onClick={() => setTab('bio')}>Bio</button>
+          <button className={`${styles.tab} ${tab === 'topics' ? styles.tabActive : ''}`} onClick={() => setTab('topics')}>Topics</button>
         </div>
 
         {/* Bio tab */}
@@ -66,48 +102,44 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
               className={styles.textarea}
               placeholder="e.g. I make sourdough, read too much, and think about fonts obsessively..."
               value={bio}
-              onChange={e => setBio(e.target.value)}
+              onChange={e => setBio(e.target.value.slice(0, 280))}
               rows={5}
             />
+            <div className={styles.charCount}>
+              <span className={bio.length >= 260 ? styles.charWarn : ''}>{bio.length}</span>/280
+            </div>
           </div>
         )}
 
         {/* Topics tab */}
         {tab === 'topics' && (
           <div className={styles.section}>
-            <p className={styles.hint}>Select topics for your garden. These appear in your navbar.</p>
+            <p className={styles.hint}>
+              Select topics for your garden.{' '}
+              <span className={topics.length >= 7 ? styles.limitReached : styles.limitCount}>
+                {topics.length}/7
+              </span>
+            </p>
             <div className={styles.topicGrid}>
               {DEFAULT_TOPICS.map(t => (
-                <button
-                  key={t}
+                <button key={t}
                   className={`${styles.topicBtn} ${topics.includes(t) ? styles.topicSelected : ''}`}
-                  onClick={() => toggleTopic(t)}
-                >
+                  onClick={() => toggleTopic(t)}>
                   {topics.includes(t) && <span>✓ </span>}{t}
                 </button>
               ))}
-
-              {/* Custom topics */}
               {topics.filter(t => !DEFAULT_TOPICS.includes(t)).map(t => (
-                <button
-                  key={t}
+                <button key={t}
                   className={`${styles.topicBtn} ${styles.topicSelected}`}
-                  onClick={() => toggleTopic(t)}
-                >
+                  onClick={() => toggleTopic(t)}>
                   ✓ {t}
                 </button>
               ))}
-
               {showCustomInput ? (
                 <div className={styles.customWrap}>
-                  <input
-                    className={styles.customInput}
-                    placeholder="e.g. Ceramics..."
-                    value={customTopic}
-                    onChange={e => setCustomTopic(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && addCustomTopic()}
-                    autoFocus
-                  />
+                  <input className={styles.customInput} placeholder="e.g. Ceramics..."
+                    value={customTopic} onChange={e => setCustomTopic(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && addCustomTopic()} autoFocus />
                   <button className={styles.customAddBtn} onClick={addCustomTopic}>Add</button>
                 </div>
               ) : (

@@ -1,25 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import CardModal from '../components/CardModal';
-import EditProfileModal from '../components/EditProfileModal';
+import EditCardModal from '../components/EditCardModal';
+import BookCard from '../components/BookCard';
 import styles from './GardenPage.module.css';
 import { computeLayout } from '../lib/gridLayout';
+import { GardenPageSkeleton } from '../components/Skeleton';
+import NotFoundPage from './NotFoundPage';
+import Icon from '../components/Icons';
 
 export default function GardenPage({ username, session, onTopicsLoaded, onNavigateToTopic, dragMode }) {
   const [profile, setProfile]           = useState(null);
   const [pinnedCards, setPinnedCards]   = useState([]);
   const [loading, setLoading]           = useState(true);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [showEditProfile, setShowEditProfile] = useState(false);
-  const [editTab, setEditTab]           = useState('bio');
+  const [editingCard, setEditingCard]   = useState(null);
 
   // Drag state
   const dragCardId = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
   const [overIdx, setOverIdx]       = useState(null);
 
-  const isOwner = session?.user?.user_metadata?.username === username ||
-    session?.user?.email?.split('@')[0] === username;
+  // Bug 6 fix: compare by user ID from loaded profile — works for all auth providers
+  const isOwner = !!(session?.user && profile?.id && session.user.id === profile?.id);
 
   useEffect(() => {
     async function load() {
@@ -29,8 +32,7 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
       const { data: pinned } = await supabase
         .from('cards').select('*')
         .eq('user_id', prof?.id).eq('pinned', true)
-        .order('position', { ascending: true })
-        .order('created_at', { ascending: false });
+        .order('position', { ascending: true });
       setProfile(prof);
       setPinnedCards(pinned || []);
       if (prof?.topics) onTopicsLoaded(prof.topics);
@@ -38,23 +40,6 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
     }
     load();
   }, [username]);
-
-  // Listen for navbar "Edit bio" / "Manage topics" events
-  useEffect(() => {
-    function onEditBio()    { setEditTab('bio');    setShowEditProfile(true); }
-    function onEditTopics() { setEditTab('topics'); setShowEditProfile(true); }
-    window.addEventListener('leaflet:editbio',    onEditBio);
-    window.addEventListener('leaflet:edittopics', onEditTopics);
-    return () => {
-      window.removeEventListener('leaflet:editbio',    onEditBio);
-      window.removeEventListener('leaflet:edittopics', onEditTopics);
-    };
-  }, []);
-
-  function onProfileSaved(updated) {
-    setProfile(updated);
-    if (updated?.topics) onTopicsLoaded(updated.topics);
-  }
 
   // ── Drag handlers ──
   function onDragStart(e, card) {
@@ -87,26 +72,32 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
     Promise.all(updated.map(c => supabase.from('cards').update({ position: c.position }).eq('id', c.id)));
   }
   function onDragEnd() { dragCardId.current = null; setDraggingId(null); setOverIdx(null); }
-  // ──────────────────
 
-  if (loading) return <div className={styles.loading}><span>🌱</span></div>;
-
-  if (!profile) {
-    return (
-      <div className={styles.notFound}>
-        <h2>Garden not found</h2>
-        <p>No garden exists at this address yet.</p>
-        <a href="/" className={styles.homeLink}>← Go home</a>
-      </div>
+  async function handlePin(card) {
+    const newPinned = !card.pinned;
+    await supabase.from('cards').update({ pinned: newPinned }).eq('id', card.id);
+    setPinnedCards(prev => newPinned
+      ? prev.map(c => c.id === card.id ? { ...c, pinned: true } : c)
+      : prev.filter(c => c.id !== card.id)
     );
   }
+
+  function onCardUpdated(updated) {
+    setPinnedCards(prev => prev.map(c => c.id === updated.id ? updated : c));
+  }
+  function onCardDeleted(id) {
+    setPinnedCards(prev => prev.filter(c => c.id !== id));
+  }
+  // ──────────────────
+
+  if (loading) return <GardenPageSkeleton />;
+
+  if (!profile) return <NotFoundPage onGoHome={() => { window.history.pushState({}, '', '/'); window.dispatchEvent(new PopStateEvent('popstate')); }} />;
 
   const topics    = profile?.topics || [];
 
   // Chester layout: intro in col 1 rows 1-N, cards fill cols 2-3 then all 3 cols
   const INTRO_ROWS = 3; // how many rows the intro spans
-  const laid = computeLayout(pinnedCards, 3); // full 3-col tetris
-
   // For the first INTRO_ROWS rows, cards that land in col 1 get pushed to col 2
   // We do this by computing layout starting from col 2 for first INTRO_ROWS rows
   function chesterLayout(cards) {
@@ -174,8 +165,8 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
               <button
                 className={styles.editBtn}
                 title="Edit your garden"
-                onClick={() => { setEditTab('bio'); setShowEditProfile(true); }}
-              >✏️</button>
+                onClick={() => window.dispatchEvent(new CustomEvent('leaflet:editbio'))}
+              ><Icon name="pencil" size={14} /></button>
             )}
           </p>
         )}
@@ -186,16 +177,40 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
 
       {/* Each card is a direct child of .page grid */}
       {dragMode && isOwner && (
-        <div className={styles.dragBanner}>⠿ Drag mode — drag pinned cards to reorder.</div>
+        <div className={styles.dragBanner}>Drag mode — drag pinned cards to reorder.</div>
       )}
 
       {pinnedCards.length === 0 ? (
         <div className={styles.noPinned}>
-          <span className={styles.noPinnedIcon}>🌱</span>
-          <p>{isOwner ? 'Pin cards from your topics to show them here.' : 'Nothing pinned yet.'}</p>
+          <Icon name="seedling" size={36} circle color="hsl(22,35%,40%)" />
+          {isOwner ? (
+              <p>Pin cards from your topics to show them here.</p>
+            ) : (
+              <>
+                <p style={{fontFamily:'var(--font-display)',fontSize:'18px',color:'var(--ink)',fontWeight:400,letterSpacing:'-0.01em'}}>This garden is still growing</p>
+                <p style={{fontFamily:'var(--font-sans)',fontSize:'13px',color:'var(--ink-faint)',marginTop:'4px'}}>Check back soon — something beautiful is being planted here.</p>
+              </>
+            )}
         </div>
       ) : (
         layoutCards.map((card, idx) => (
+          card.card_type === 'book' ? (
+            <div key={card.id} style={{ gridColumn: card.gridColumn, gridRow: card.gridRow }}>
+              <BookCard
+                card={card} isOwner={isOwner} dragMode={dragMode}
+                dragging={draggingId === card.id}
+                dragOver={dragMode && overIdx === idx && draggingId !== card.id}
+                onDragStart={dragMode ? e => onDragStart(e, card) : undefined}
+                onDragEnter={dragMode ? e => onDragEnter(e, card) : undefined}
+                onDragOver={dragMode ? onDragOver : undefined}
+                onDrop={dragMode ? e => onDrop(e, card) : undefined}
+                onDragEnd={dragMode ? onDragEnd : undefined}
+                onPin={() => handlePin(card)}
+                onEdit={() => setEditingCard(card)}
+                onClick={() => !dragMode && setSelectedCard(card)}
+              />
+            </div>
+          ) : (
           <div
             key={card.id}
             className={`
@@ -214,39 +229,37 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
             onDragEnd={dragMode ? onDragEnd : undefined}
             onClick={() => !dragMode && setSelectedCard(card)}
           >
-            {dragMode && isOwner && <div className={styles.dragHandle}>⠿</div>}
+            {dragMode && isOwner && <div className={styles.dragHandle}><Icon name="drag" size={16} color="white" /></div>}
             {card.image_url ? (
               <>
                 <img src={card.image_url} alt={card.title} className={styles.cardImg} />
                 <div className={styles.cardOverlay}>
-                  <div className={styles.cardTopic}>📌 {card.topic}</div>
+                  <div className={styles.cardTopic}><Icon name="pin" size={10} /> {card.topic}</div>
                   <h3 className={styles.cardTitle}>{card.title}</h3>
                 </div>
               </>
             ) : (
               <>
-                <div className={styles.cardTopic}>📌 {card.topic}</div>
+                <div className={styles.cardTopic}><Icon name="pin" size={10} /> {card.topic}</div>
                 <h3 className={styles.cardTitle}>{card.title}</h3>
                 {card.content && (
                   <p className={styles.cardText}>
-                    {card.content.length > 100 ? card.content.slice(0, 100) + '...' : card.content}
+                    {card.content.length > 160 ? card.content.slice(0, 160) + '...' : card.content}
                   </p>
                 )}
               </>
             )}
           </div>
+          )
         ))
       )}
 
       {selectedCard && <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} onNavigateToTopic={onNavigateToTopic} />}
-
-      {showEditProfile && (
-        <EditProfileModal
-          profile={profile}
-          initialTab={editTab}
-          onClose={() => setShowEditProfile(false)}
-          onSaved={onProfileSaved}
-        />
+      {editingCard && (
+        <EditCardModal card={editingCard}
+          onClose={() => setEditingCard(null)}
+          onCardUpdated={onCardUpdated}
+          onCardDeleted={onCardDeleted} />
       )}
     </div>
   );

@@ -224,3 +224,26 @@
   .grid { grid-template-columns: 1fr; }
   .searchBox { max-width: 100%; }
 }
+
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0 20px;
+}
+
+.loadMoreBtn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 40px;
+  padding: 12px 32px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.loadMoreBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}

@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import AddCardModal from '../components/AddCardModal';
+import AddBookModal from '../components/AddBookModal';
+import BookCard from '../components/BookCard';
 import CardModal from '../components/CardModal';
 import EditCardModal from '../components/EditCardModal';
 import styles from './TopicPage.module.css';
 import { computeLayout } from '../lib/gridLayout';
+import { TopicPageSkeleton } from '../components/Skeleton';
+import Icon from '../components/Icons';
 
-export default function TopicPage({ username, topic, session, dragMode }) {
+export default function TopicPage({ username, topic, session, dragMode, onTopicsLoaded, onNavigateToTopic }) {
   const [profile, setProfile]       = useState(null);
   const [cards, setCards]           = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -16,12 +20,15 @@ export default function TopicPage({ username, topic, session, dragMode }) {
 
   // Drag state
   const dragCardId   = useRef(null);  // id of card being dragged
-  const dragOverId   = useRef(null);  // id of card being hovered over
   const [draggingId, setDraggingId] = useState(null);
   const [overIdx, setOverIdx]       = useState(null);
 
-  const isOwner = session?.user?.user_metadata?.username === username ||
-    session?.user?.email?.split('@')[0] === username;
+  // Bug 6 fix: compare by user ID from loaded profile — works for all auth providers
+  const isOwner = !!(session?.user && profile?.id && session.user.id === profile?.id);
+
+  const BOOK_TOPICS = ['reading', 'books', 'book'];
+  const isBookTopic = BOOK_TOPICS.includes(topic?.toLowerCase());
+
 
   useEffect(() => {
     async function load() {
@@ -30,11 +37,11 @@ export default function TopicPage({ username, topic, session, dragMode }) {
         .from('profiles').select('*').eq('username', username).single();
       const { data: cardData } = await supabase
         .from('cards').select('*')
-        .eq('user_id', prof?.id).eq('topic', topic)
-        .order('position', { ascending: true })
-        .order('created_at', { ascending: false });
+        .eq('user_id', prof?.id).ilike('topic', topic)  // case-insensitive match
+        .order('position', { ascending: true });
       setProfile(prof);
       setCards(cardData || []);
+      if (prof?.topics) onTopicsLoaded?.(prof.topics);
       setLoading(false);
     }
     load();
@@ -56,7 +63,6 @@ export default function TopicPage({ username, topic, session, dragMode }) {
   function onDragEnter(e, card) {
     e.preventDefault();
     if (card.id === dragCardId.current) return;
-    dragOverId.current = card.id;
     setOverIdx(cards.findIndex(c => c.id === card.id));
   }
 
@@ -88,7 +94,6 @@ export default function TopicPage({ username, topic, session, dragMode }) {
 
   function onDragEnd() {
     dragCardId.current = null;
-    dragOverId.current = null;
     setDraggingId(null);
     setOverIdx(null);
   }
@@ -119,7 +124,7 @@ export default function TopicPage({ username, topic, session, dragMode }) {
     setCards(prev => prev.filter(c => c.id !== id));
   }
 
-  if (loading) return <div className={styles.loading}><span>🌱</span></div>;
+  if (loading) return <TopicPageSkeleton />;
 
   return (
     <div className={styles.page}>
@@ -127,17 +132,35 @@ export default function TopicPage({ username, topic, session, dragMode }) {
       {/* Drag mode banner */}
       {dragMode && isOwner && (
         <div className={styles.dragBanner}>
-          ⠿ Drag mode — drag cards to reorder. Turn off in settings when done.
+          Drag mode — drag cards to reorder. Turn off in settings when done.
         </div>
       )}
 
       <div className={styles.header}>
-        <h1 className={styles.title}>{topic.toLowerCase()}.</h1>
+        <h1 className={styles.title}>{topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase()}.</h1>
       </div>
 
       {cards.length > 0 ? (
         <div className={`${styles.grid} ${dragMode && isOwner ? styles.dragActive : ''}`}>
           {computeLayout(cards).map((card, idx) => (
+            card.card_type === 'book' ? (
+              // BookCard manages its own styling — no outer wrapper
+              <div key={card.id} style={{ gridColumn: card.gridColumn, gridRow: card.gridRow }}>
+                <BookCard
+                  card={card} isOwner={isOwner} dragMode={dragMode}
+                  dragging={draggingId === card.id}
+                  dragOver={dragMode && overIdx === idx && draggingId !== card.id}
+                  onDragStart={dragMode ? e => onDragStart(e, card) : undefined}
+                  onDragEnter={dragMode ? e => onDragEnter(e, card) : undefined}
+                  onDragOver={dragMode ? onDragOver : undefined}
+                  onDrop={dragMode ? e => onDrop(e, card) : undefined}
+                  onDragEnd={dragMode ? onDragEnd : undefined}
+                  onPin={() => handlePin(card)}
+                  onEdit={() => setEditingCard(card)}
+                  onClick={() => !dragMode && setSelectedCard(card)}
+                />
+              </div>
+            ) : (
             <div
               key={card.id}
               className={`
@@ -147,10 +170,7 @@ export default function TopicPage({ username, topic, session, dragMode }) {
                 ${draggingId === card.id ? styles.isDragging : ''}
                 ${dragMode && overIdx === idx && draggingId !== card.id ? styles.isDragOver : ''}
               `}
-              style={{
-                gridColumn: card.gridColumn,
-                gridRow: card.gridRow,
-              }}
+              style={{ gridColumn: card.gridColumn, gridRow: card.gridRow }}
               draggable={dragMode && isOwner}
               onDragStart={dragMode ? e => onDragStart(e, card) : undefined}
               onDragEnter={dragMode ? e => onDragEnter(e, card) : undefined}
@@ -159,12 +179,9 @@ export default function TopicPage({ username, topic, session, dragMode }) {
               onDragEnd={dragMode ? onDragEnd : undefined}
               onClick={() => !dragMode && setSelectedCard(card)}
             >
-              {/* Drag handle — only in drag mode */}
               {dragMode && isOwner && (
                 <div className={styles.dragHandle}>⠿</div>
               )}
-
-              {/* Owner action buttons — hidden in drag mode */}
               {isOwner && !dragMode && (
                 <div className={styles.cardActions}>
                   <button
@@ -172,18 +189,17 @@ export default function TopicPage({ username, topic, session, dragMode }) {
                     onClick={e => { e.stopPropagation(); handlePin(card); }}
                     title={card.pinned ? 'Unpin' : 'Pin to garden'}
                   >
-                    {card.pinned ? '📌' : '⊕'}
+                    {card.pinned ? <Icon name="pin" size={12} /> : <Icon name="plus" size={12} />}
                   </button>
                   <button
                     className={styles.actionBtn}
                     onClick={e => { e.stopPropagation(); setEditingCard(card); }}
                     title="Edit card"
                   >
-                    ✏️
+                    <Icon name="pencil" size={12} />
                   </button>
                 </div>
               )}
-
               {card.image_url ? (
                 <>
                   <img src={card.image_url} alt={card.title} className={styles.cardImg} />
@@ -197,19 +213,26 @@ export default function TopicPage({ username, topic, session, dragMode }) {
                 </>
               ) : (
                 <>
-                  <div className={styles.cardMeta}>{topic}</div>
+                  <div className={styles.cardMeta}>
+                    <span>{topic}</span>
+                    {card.external_url && (
+                      <a href={card.external_url} target="_blank" rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()} style={{color:'var(--ink-faint)',fontSize:'14px'}}>↗</a>
+                    )}
+                  </div>
                   <h3 className={styles.cardTitle}>{card.title}</h3>
                   <div className={styles.cardDate}>
                     {new Date(card.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </div>
                   {card.content && (
                     <p className={styles.cardExcerpt}>
-                      {card.content.length > 120 ? card.content.slice(0, 120) + '...' : card.content}
+                      {card.content.length > 180 ? card.content.slice(0, 180) + '...' : card.content}
                     </p>
                   )}
                 </>
               )}
             </div>
+            )
           ))}
 
           {isOwner && !dragMode && (
@@ -238,11 +261,19 @@ export default function TopicPage({ username, topic, session, dragMode }) {
       )}
 
       {showAddCard && (
-        <AddCardModal session={session} topics={[topic]}
-          onClose={() => setShowAddCard(false)} onCardAdded={onCardAdded} />
+        isBookTopic ? (
+          <AddBookModal
+            session={session} topic={topic}
+            onClose={() => setShowAddCard(false)}
+            onCardAdded={onCardAdded}
+          />
+        ) : (
+          <AddCardModal session={session} topics={[topic]}
+            onClose={() => setShowAddCard(false)} onCardAdded={onCardAdded} />
+        )
       )}
       {selectedCard && (
-        <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
+        <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} onNavigateToTopic={onNavigateToTopic} />
       )}
       {editingCard && (
         <EditCardModal card={editingCard}

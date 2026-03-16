@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './OnboardingModal.module.css';
+import Icon from './Icons';
 
 const DEFAULT_TOPICS = [
   'Writing', 'Photography', 'Reading', 'Code',
@@ -34,9 +35,13 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
 
   async function handleFinish() {
     setSaving(true);
-    const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
+    // Always read username from profiles table — handles Google OAuth correctly
+    const { data: existing } = await supabase
+      .from('profiles').select('username').eq('id', session.user.id).single();
+    const username = existing?.username
+      || session.user.user_metadata?.username
+      || session.user.email.split('@')[0];
 
-    // Save to Supabase profiles table
     await supabase.from('profiles').upsert({
       id: session.user.id,
       username,
@@ -50,7 +55,11 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
   }
 
   async function handleSkip() {
-    const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
+    const { data: existing } = await supabase
+      .from('profiles').select('username').eq('id', session.user.id).single();
+    const username = existing?.username
+      || session.user.user_metadata?.username
+      || session.user.email.split('@')[0];
     await supabase.from('profiles').upsert({
       id: session.user.id,
       username,
@@ -75,7 +84,7 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
         {/* ── Step 1: What is a digital garden ── */}
         {step === 1 && (
           <div className={styles.step}>
-            <div className={styles.stepIcon}>🌱</div>
+            <div className={styles.stepIcon}><Icon name="seedling" circle size={24} /></div>
             <h2 className={styles.title}>What's a digital garden?</h2>
             <p className={styles.body}>
               A digital garden is your personal corner of the internet — not a
@@ -163,7 +172,7 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
         {/* ── Step 3: About you ── */}
         {step === 3 && (
           <div className={styles.step}>
-            <div className={styles.stepIcon}>✍️</div>
+            <div className={styles.stepIcon}><Icon name="write" circle size={24} /></div>
             <h2 className={styles.title}>Tell us a little about you</h2>
             <p className={styles.subTitle}>This shows up on your garden page. Keep it short and personal.</p>
 
@@ -181,7 +190,7 @@ export default function OnboardingModal({ session, onComplete, onSkip }) {
             <div className={styles.actions}>
               <button className={styles.skipBtn} onClick={() => handleFinish()}>Skip</button>
               <button className={styles.nextBtn} onClick={handleFinish} disabled={saving}>
-                {saving ? 'Planting...' : 'Open my garden 🌸'}
+                {saving ? 'Planting...' : 'Open my garden'}
               </button>
             </div>
           </div>

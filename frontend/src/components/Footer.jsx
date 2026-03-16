@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './Footer.module.css';
+import Icon from './Icons';
 
 export default function Footer() {
   return (
@@ -7,7 +8,7 @@ export default function Footer() {
       <div className={styles.inner}>
         <div className={styles.brand}>
           <span className={styles.brandName}>Leaflet</span>
-          <span>🌸</span>
+          <Icon name="flower" size={16} color="hsl(22,35%,45%)" />
         </div>
         <nav className={styles.links}>
           <a href="/about" className={styles.link}>About</a>
