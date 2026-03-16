@@ -4,7 +4,6 @@ import CardModal from '../components/CardModal';
 import EditCardModal from '../components/EditCardModal';
 import BookCard from '../components/BookCard';
 import styles from './GardenPage.module.css';
-import { computeLayout } from '../lib/gridLayout';
 import { GardenPageSkeleton } from '../components/Skeleton';
 import NotFoundPage from './NotFoundPage';
 import Icon from '../components/Icons';
@@ -39,7 +38,7 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
       setLoading(false);
     }
     load();
-  }, [username]);
+  }, [username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Drag handlers ──
   function onDragStart(e, card) {

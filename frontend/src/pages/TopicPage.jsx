@@ -45,7 +45,7 @@ export default function TopicPage({ username, topic, session, dragMode, onTopics
       setLoading(false);
     }
     load();
-  }, [username, topic]);
+  }, [username, topic]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Drag handlers ──────────────────────────────
   function onDragStart(e, card) {

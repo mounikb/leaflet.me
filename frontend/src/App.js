@@ -11,7 +11,6 @@ import AuthModal from './components/AuthModal';
 import OnboardingModal from './components/OnboardingModal';
 import EditProfileModal from './components/EditProfileModal';
 import UsernameSetupModal from './components/UsernameSetupModal';
-import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
   const [session, setSession] = useState(null);

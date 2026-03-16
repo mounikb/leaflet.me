@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './AuthModal.module.css';
 

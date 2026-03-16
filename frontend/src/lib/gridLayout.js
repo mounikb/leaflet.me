@@ -4,8 +4,6 @@
  * Grid is COLS wide, grows vertically as needed.
  */
 
-const COLS = 3;
-
 export function getSizeClasses(size) {
   switch (size) {
     case '2x2': return { colSpan: 2, rowSpan: 2 };
