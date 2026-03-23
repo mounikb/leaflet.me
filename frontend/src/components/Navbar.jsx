@@ -12,7 +12,8 @@ const DEFAULT_LINKS = [
 export default function Navbar({
   session, onAuthClick, onLogoClick, onDiscoverClick,
   gardenTopics, gardenUsername, activeTopic, onTopicClick,
-  onDragModeToggle, dragMode, isOwnerGarden, onAboutClick
+  onDragModeToggle, dragMode, isOwnerGarden, onAboutClick,
+  isGardenPage  // FIX: explicit prop instead of inferring from gardenTopics.length
 }) {
   const [scrolled, setScrolled]         = useState(false);
   const [menuOpen, setMenuOpen]         = useState(false);
@@ -31,13 +32,11 @@ export default function Navbar({
     function handleClick(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
-       
       }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
-
 
   async function handleSignOut() {
     setShowSignOutConfirm(true);
@@ -49,8 +48,6 @@ export default function Navbar({
     setShowSignOutConfirm(false);
     await supabase.auth.signOut();
   }
-
-  const isGardenPage = gardenTopics && gardenTopics.length > 0;
 
   return (
     <>
@@ -69,8 +66,9 @@ export default function Navbar({
             </a>
           </li>
 
+          {/* FIX: use isGardenPage prop instead of gardenTopics.length > 0 */}
           {isGardenPage ? (
-            [gardenUsername, ...gardenTopics].map(item => (
+            [gardenUsername, ...(gardenTopics || [])].map(item => (
               <li key={item}>
                 <button
                   className={`${styles.link} ${activeTopic === item ? styles.topicActive : ''}`}
@@ -114,7 +112,6 @@ export default function Navbar({
                   {menuOpen && (
                     <div className={styles.dropdown}>
                       <div className={styles.dropdownHeader}>Your Garden</div>
-
 
                       <div className={styles.dropDivider} />
 
@@ -202,7 +199,7 @@ export default function Navbar({
       {mobileOpen && (
         <div className={styles.mobileDrawer}>
           {isGardenPage ? (
-            [gardenUsername, ...gardenTopics].map(item => (
+            [gardenUsername, ...(gardenTopics || [])].map(item => (
               <button key={item}
                 className={`${styles.mobileLink} ${activeTopic === item ? styles.mobileLinkActive : ''}`}
                 onClick={() => { onTopicClick(item); setMobileOpen(false); }}

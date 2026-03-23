@@ -14,6 +14,7 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
   const [customTopic, setCustomTopic] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [saving, setSaving]           = useState(false);
+  const [saveError, setSaveError]     = useState('');
   // Topics pending removal — need user confirmation
   const [pendingRemove, setPendingRemove] = useState(null); // topic name
 
@@ -29,15 +30,13 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
 
   async function confirmRemove() {
     const topic = pendingRemove;
-    // Delete all cards for this topic
-    const { data: prof } = await supabase
-      .from('profiles').select('id').eq('id', profile.id).single();
-    if (prof) {
-      await supabase.from('cards')
-        .delete()
-        .eq('user_id', profile.id)
-        .eq('topic', topic);
-    }
+    // profile.id is already available as a prop — no need to re-fetch it
+    // (the old fetch introduced a race where a network failure would skip card
+    // deletion but still remove the topic from local state, orphaning the cards)
+    await supabase.from('cards')
+      .delete()
+      .eq('user_id', profile.id)
+      .eq('topic', topic);
     setTopics(prev => prev.filter(t => t !== topic));
     setPendingRemove(null);
   }
@@ -63,13 +62,17 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
 
   async function handleSave() {
     setSaving(true);
-    const { data } = await supabase
+    const { data, error: dbError } = await supabase
       .from('profiles')
       .update({ bio: bio.trim(), topics })
       .eq('id', profile.id)
       .select()
       .single();
     setSaving(false);
+    if (dbError || !data) {
+      setSaveError('Something went wrong saving. Please try again.');
+      return;
+    }
     onSaved(data);
     onClose();
   }
@@ -162,6 +165,7 @@ export default function EditProfileModal({ profile, initialTab = 'bio', onClose,
           </div>
         )}
 
+        {saveError && <p style={{fontFamily:'var(--font-sans)',fontSize:'13px',color:'hsl(0,65%,45%)',marginBottom:'8px'}}>{saveError}</p>}
         <div className={styles.actions}>
           <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
           <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>

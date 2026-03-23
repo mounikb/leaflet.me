@@ -66,7 +66,11 @@ export default function AddBookModal({ session, topic, onClose, onCardAdded }) {
     if (!title.trim()) { setError('Please add a title.'); return; }
     setSaving(true); setError('');
 
-    let imageUrl = coverPreview;
+    // Resolve the cover image URL:
+    // - If coverFile is set, upload it to Supabase Storage and use the public URL
+    // - If coverPreview is an external URL (e.g. openlibrary fallback when CORS blocked fetch), use it as-is
+    // - If coverPreview is a blob: URL but coverFile is null (shouldn't happen normally), treat as no cover
+    let imageUrl = null;
 
     if (coverFile) {
       const ext = coverFile.name.split('.').pop();
@@ -76,7 +80,11 @@ export default function AddBookModal({ session, topic, onClose, onCardAdded }) {
       if (uploadError) { setError('Cover upload failed.'); setSaving(false); return; }
       const { data } = supabase.storage.from('card-images').getPublicUrl(path);
       imageUrl = data.publicUrl;
+    } else if (coverPreview && !coverPreview.startsWith('blob:')) {
+      // External URL (e.g. openlibrary.org) — store directly
+      imageUrl = coverPreview;
     }
+    // If coverPreview is a blob: URL without a coverFile, skip it (stale object URL)
 
     const { data: existing } = await supabase
       .from('cards').select('position')

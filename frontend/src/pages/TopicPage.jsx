@@ -137,7 +137,8 @@ export default function TopicPage({ username, topic, session, dragMode, onTopics
       )}
 
       <div className={styles.header}>
-        <h1 className={styles.title}>{topic.charAt(0).toUpperCase() + topic.slice(1).toLowerCase()}.</h1>
+        {/* FIX: don't lowercase the rest — preserves multi-word topics like "Machine Learning" */}
+        <h1 className={styles.title}>{topic.charAt(0).toUpperCase() + topic.slice(1)}.</h1>
       </div>
 
       {cards.length > 0 ? (

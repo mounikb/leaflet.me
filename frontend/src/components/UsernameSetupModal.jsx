@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './UsernameSetupModal.module.css';
 import Icon from './Icons';
@@ -24,6 +24,9 @@ export default function UsernameSetupModal({ session, onComplete }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const debounce = useRef(null);
+
+  // Clear pending debounce on unmount to avoid setState on unmounted component
+  useEffect(() => () => clearTimeout(debounce.current), []);
 
   function handleChange(e) {
     const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');

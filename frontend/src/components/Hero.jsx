@@ -18,7 +18,7 @@ const HOW_ITEMS = [
   { icon: 'pencil',   title: 'Write at your own pace', desc: 'No publishing pressure. Add a sentence today, a paragraph next week. Your garden grows with you.' },
 ];
 
-export default function Hero({ onAuthClick, planting }) {
+export default function Hero({ onAuthClick, onDiscoverClick, planting }) {
   return (
     <div className={styles.page}>
 
@@ -41,7 +41,7 @@ export default function Hero({ onAuthClick, planting }) {
             <button onClick={onAuthClick} className={styles.btnPrimary} disabled={planting}>
               {planting ? 'Opening garden...' : 'Plant your garden →'}
             </button>
-            <button onClick={onAuthClick} className={styles.btnOutline}>
+            <button onClick={onDiscoverClick} className={styles.btnOutline}>
               Explore gardens
             </button>
           </div>
@@ -120,7 +120,7 @@ export default function Hero({ onAuthClick, planting }) {
             <button onClick={onAuthClick} className={styles.btnPrimary} disabled={planting}>
               {planting ? 'Opening garden...' : 'Plant your garden →'}
             </button>
-            <button onClick={onAuthClick} className={styles.btnOutline}>
+            <button onClick={onDiscoverClick} className={styles.btnOutline}>
               See examples
             </button>
           </div>

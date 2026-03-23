@@ -46,6 +46,12 @@
   font-style: italic;
 }
 
+.bioEmpty {
+  color: var(--ink-faint);
+  font-style: italic;
+  opacity: 0.5;
+}
+
 .emptyHint {
   font-family: var(--font-sans); font-size: 14px;
   color: var(--ink-faint); font-style: italic; line-height: 1.6; margin-top: 24px;

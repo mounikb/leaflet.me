@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import styles from './AuthModal.module.css';
 
@@ -38,6 +38,9 @@ export default function AuthModal({ onClose }) {
   const [usernameStatus, setUsernameStatus] = useState(null); // null | 'checking' | 'available' | 'taken' | 'invalid'
   const [usernameMsg, setUsernameMsg]       = useState('');
   const debounceRef = useRef(null);
+
+  // Clear pending debounce on unmount to avoid setState on unmounted component
+  useEffect(() => () => clearTimeout(debounceRef.current), []);
 
   function handleChange(e) {
     const { name, value } = e.target;

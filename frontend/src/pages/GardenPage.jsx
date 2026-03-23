@@ -38,6 +38,22 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
       setLoading(false);
     }
     load();
+
+    // FIX: listen for profile updates so bio/topics reflect instantly without remount.
+    // Guard by profile ID so viewing someone else's garden isn't affected.
+    function onProfileUpdated(e) {
+      const updated = e.detail;
+      if (!updated) return;
+      // Only apply if the update is for the profile currently being viewed
+      setProfile(prev => {
+        if (!prev || prev.id !== updated.id) return prev;
+        return { ...prev, ...updated };
+      });
+      // onTopicsLoaded is safe to call — App.js already guards isOwnerGarden for display
+      if (updated.topics != null) onTopicsLoaded(updated.topics);
+    }
+    window.addEventListener('leaflet:profileupdated', onProfileUpdated);
+    return () => window.removeEventListener('leaflet:profileupdated', onProfileUpdated);
   }, [username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Drag handlers ──
@@ -75,10 +91,15 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
   async function handlePin(card) {
     const newPinned = !card.pinned;
     await supabase.from('cards').update({ pinned: newPinned }).eq('id', card.id);
-    setPinnedCards(prev => newPinned
-      ? prev.map(c => c.id === card.id ? { ...c, pinned: true } : c)
-      : prev.filter(c => c.id !== card.id)
-    );
+    // FIX: when pinning, append the card if it isn't already in pinnedCards
+    setPinnedCards(prev => {
+      if (newPinned) {
+        return prev.some(c => c.id === card.id)
+          ? prev.map(c => c.id === card.id ? { ...c, pinned: true } : c)
+          : [...prev, { ...card, pinned: true }];
+      }
+      return prev.filter(c => c.id !== card.id);
+    });
   }
 
   function onCardUpdated(updated) {
@@ -157,9 +178,10 @@ export default function GardenPage({ username, session, onTopicsLoaded, onNaviga
 
       {/* Intro — col 1, spans INTRO_ROWS rows */}
       <aside className={styles.intro}>
-        {profile.bio && (
+        {/* Always show bio section for owner so they can edit even when empty */}
+        {(profile.bio || isOwner) && (
           <p className={styles.bio}>
-            {profile.bio}
+            {profile.bio || <span className={styles.bioEmpty}>Add a bio…</span>}
             {isOwner && (
               <button
                 className={styles.editBtn}

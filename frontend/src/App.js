@@ -66,7 +66,7 @@ export default function App() {
       }
     });
 
-    // Bug 3: Browser back/forward button support
+    // Browser back/forward button support
     function handlePopState() {
       checkPageFromUrl();
     }
@@ -87,7 +87,6 @@ export default function App() {
     if (parts[0]) {
       setGardenUsername(parts[0]);
       if (parts[1]) {
-        // Keep raw URL casing; TopicPage will query case-insensitively
         setCurrentTopic(parts[1]);
         setCurrentPage('topic');
       } else {
@@ -95,7 +94,6 @@ export default function App() {
       }
     }
   }
-
 
   function navigateToDiscover() {
     setCurrentPage('discover');
@@ -111,14 +109,12 @@ export default function App() {
     if (planting) return;
     setPlanting(true);
 
-    // Always fetch username from profiles table — most reliable source
     const { data: profile } = await supabase
       .from('profiles')
       .select('username, onboarded')
       .eq('id', session.user.id)
       .single();
 
-    // Fall back to user_metadata username, then email prefix as last resort
     const username = profile?.username
       || session.user.user_metadata?.username
       || session.user.email.split('@')[0];
@@ -143,7 +139,6 @@ export default function App() {
   function navigateToTopic(topic) {
     setCurrentTopic(topic);
     setCurrentPage('topic');
-    // Keep gardenTopics — same user, topics don't change
     window.history.pushState({}, '', `/${gardenUsername}/${topic.toLowerCase()}`);
   }
 
@@ -163,12 +158,16 @@ export default function App() {
     window.history.pushState({}, '', `/${gardenUsername}`);
   }
 
+  // FIX: rely only on profileData (loaded from DB) for ownership check — avoids
+  // stale user_metadata or email-prefix mismatches across auth providers
   const isOwnerGarden =
     currentPage !== 'home' && currentPage !== 'discover' &&
     !!session?.user &&
-    (session.user.user_metadata?.username === gardenUsername ||
-     session.user.email?.split('@')[0] === gardenUsername ||
-     profileData?.username === gardenUsername);
+    !!profileData &&
+    profileData.username === gardenUsername;
+
+  // FIX: show garden-style navbar whenever on a garden/topic page, even with 0 topics
+  const isGardenPage = currentPage === 'garden' || currentPage === 'topic';
 
   return (
     <div className="appShell">
@@ -179,8 +178,9 @@ export default function App() {
         onLogoClick={goHome}
         onDiscoverClick={navigateToDiscover}
         onAboutClick={() => { setGardenUsername('leaflet'); setCurrentTopic(null); setCurrentPage('garden'); setGardenTopics([]); setGardenRefreshKey(k => k+1); window.history.pushState({}, '', '/leaflet'); }}
-        gardenTopics={currentPage !== 'home' && currentPage !== 'discover' ? gardenTopics : []}
-        gardenUsername={currentPage !== 'home' && currentPage !== 'discover' ? gardenUsername : null}
+        gardenTopics={isGardenPage ? gardenTopics : []}
+        gardenUsername={isGardenPage ? gardenUsername : null}
+        isGardenPage={isGardenPage}
         activeTopic={currentPage === 'topic' ? currentTopic : gardenUsername}
         onTopicClick={(t) => {
           if (t === gardenUsername) { goToGarden(); }
@@ -192,7 +192,7 @@ export default function App() {
       />
 
       {currentPage === 'home' && (
-        <HomePage onAuthClick={handlePlantClick} planting={planting} />
+        <HomePage onAuthClick={handlePlantClick} onDiscoverClick={navigateToDiscover} planting={planting} />
       )}
 
       {currentPage === 'discover' && (
@@ -220,7 +220,6 @@ export default function App() {
           username={gardenUsername}
           topic={currentTopic}
           session={session}
-          onBack={goToGarden}
           dragMode={dragMode}
           onTopicsLoaded={setGardenTopics}
           onNavigateToTopic={navigateToTopic}
@@ -246,15 +245,38 @@ export default function App() {
           profile={profileData}
           initialTab={editProfileTab}
           onClose={() => setShowEditProfile(false)}
-          onSaved={(updated) => { setProfileData({ ...profileData, ...updated }); setShowEditProfile(false); }}
+          onSaved={(updated) => {
+            const merged = { ...profileData, ...updated };
+            setProfileData(merged);
+            // Update navbar topics instantly from the saved response — no remount needed
+            // (DB is already updated by the time onSaved fires, so GardenPage's own
+            // profile state is the only thing stale — we patch it via the event below)
+            if (updated?.topics != null) setGardenTopics(updated.topics);
+            // Tell the already-mounted GardenPage to update its local profile state
+            // without a full remount, so the bio change is also reflected immediately
+            window.dispatchEvent(new CustomEvent('leaflet:profileupdated', { detail: merged }));
+            setShowEditProfile(false);
+          }}
         />
       )}
 
       {showOnboarding && (
         <OnboardingModal
           session={session}
-          onComplete={(username) => { setShowOnboarding(false); navigateToGarden(username); }}
-          onSkip={(username) => { setShowOnboarding(false); navigateToGarden(username); }}
+          onComplete={(username) => {
+            setShowOnboarding(false);
+            // FIX: reload profileData after onboarding so navbar/ownership is correct
+            supabase.from('profiles').select('*').eq('id', session.user.id).single()
+              .then(({ data }) => { if (data) setProfileData(data); });
+            navigateToGarden(username);
+          }}
+          onSkip={(username) => {
+            setShowOnboarding(false);
+            // FIX: same — reload profile after skip so garden page has fresh data
+            supabase.from('profiles').select('*').eq('id', session.user.id).single()
+              .then(({ data }) => { if (data) setProfileData(data); });
+            navigateToGarden(username);
+          }}
         />
       )}
     </div>
